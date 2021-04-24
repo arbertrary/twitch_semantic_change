@@ -1,0 +1,54 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: cp-cos-sampled-sg0-fst-fb
+  namespace: studbernstetter
+  annotations:
+    description: "detect changepoint"
+spec:
+  template:
+    spec:
+      priorityClassName: research-med
+      imagePullSecrets:
+        - name: gitlab-registry-bernstetter
+      containers:
+        - name: pythonbase
+          image: gitlab2.informatik.uni-wuerzburg.de:4567/s319059/containers/pythonbase
+          imagePullPolicy: "Always"
+          resources:
+            limits:
+              cpu: "12"
+              memory: "32Gi"
+            requests:
+              cpu: "12"
+              memory: "32Gi"
+          command:
+            - "python3"
+            - "/home/stud/bernstetter/ma/initial/semantic_change_detection/change_point_detection.py"
+            - "--models_rootdir=/home/stud/bernstetter/models/twitch_sampled/timeseries/"
+            - "--outfiles_dir=/home/stud/bernstetter/models/twitch_sampled/results/changepoint/sg0Targets/"
+            - "--targets=/home/stud/bernstetter/ma/initial/semantic_change_detection/targets/targets.csv"
+            - "--distance_measure=cosine"
+            - "--k_neighbors=5"
+            - "--min_count=20"
+            - "--skipgram=0"
+            - "--no_of_iter=10"
+            - "--word2vec=1"
+            - "--z_scores"
+            - "--align_to=fst"
+            - "--compare_to=fst"
+            - "--vocab_threshold=50"
+            - "--clean=0"
+          volumeMounts:
+            - mountPath: /home/stud/bernstetter
+              name: home
+      restartPolicy: "Never"
+      volumes:
+        - name: home
+          cephfs:
+            monitors:
+              - 132.187.14.16,132.187.14.17,132.187.14.19,132.187.14.20
+            user: studbernstetter
+            path: "/home/stud/bernstetter"
+            secretRef:
+              name: ceph-secret-studbernstetter

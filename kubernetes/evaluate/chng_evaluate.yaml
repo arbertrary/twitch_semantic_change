@@ -1,0 +1,44 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: evaluate-sg0
+  namespace: studbernstetter
+  annotations:
+    description: "evaluate"
+spec:
+  template:
+    spec:
+      priorityClassName: research-low
+      imagePullSecrets:
+        - name: gitlab-registry-bernstetter
+      containers:
+        - name: pythonbase
+          image: gitlab2.informatik.uni-wuerzburg.de:4567/s319059/containers/pythonbase
+          imagePullPolicy: "Always"
+          resources:
+            limits:
+              cpu: "2"
+              memory: "4Gi"
+            requests:
+              cpu: "2"
+              memory: "4Gi"
+          command:
+            - "python3"
+            - "/home/stud/bernstetter/ma/initial/evaluation/evaluate_synthetic_data_results.py"
+            - "--results_dir=/home/stud/bernstetter/models/dta/results/changepoint/sg0/"
+            - "--results_fn=time_series_analysis_NOT_standardized_output_f2019-05_l2020-04_afirst_cfirst_mcosine_k5_s1000_p0.05_g0_v50.tsv"
+            - "--word_column=0"
+            - "--pseudoword_design_dict=/home/stud/bernstetter/datasets/dta/synth_dta/pseudoword_dict.json"
+          volumeMounts:
+            - mountPath: /home/stud/bernstetter
+              name: home
+      restartPolicy: "Never"
+      volumes:
+        - name: home
+          cephfs:
+            monitors:
+              - 132.187.14.16,132.187.14.17,132.187.14.19,132.187.14.20
+            user: studbernstetter
+            path: "/home/stud/bernstetter"
+            secretRef:
+              name: ceph-secret-studbernstetter

@@ -1,0 +1,42 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: design-pseudowords
+  namespace: studbernstetter
+  annotations:
+    description: ""
+spec:
+  template:
+    spec:
+      priorityClassName: research-low
+      imagePullSecrets:
+        - name: gitlab-registry-bernstetter
+      containers:
+        - name: pythonbase
+          image: gitlab2.informatik.uni-wuerzburg.de:4567/s319059/containers/pythonbase
+          imagePullPolicy: "Always"
+          resources:
+            limits:
+              cpu: "4"
+              memory: "8Gi"
+            requests:
+              cpu: "4"
+              memory: "8Gi"
+          command:
+            - "python3"
+            - "/home/stud/bernstetter/ma/initial/synthetic_data_generation/design_pseudowords.py"
+            - "--input_filepath=/home/stud/bernstetter/datasets/synthetic_twitch2/vocab_stats.csv"           
+            - "--outfiles_rootdir=/home/stud/bernstetter/datasets/synthetic_twitch2/"
+          volumeMounts:
+            - mountPath: /home/stud/bernstetter
+              name: home
+      restartPolicy: "Never"
+      volumes:
+        - name: home
+          cephfs:
+            monitors:
+              - 132.187.14.16,132.187.14.17,132.187.14.19,132.187.14.20
+            user: studbernstetter
+            path: "/home/stud/bernstetter"
+            secretRef:
+              name: ceph-secret-studbernstetter

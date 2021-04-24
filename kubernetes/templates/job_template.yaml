@@ -1,0 +1,63 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  namespace: zehe
+  name: nnseg-pair-new-scenes-fine-full-{{ fold_num }}
+spec:
+  template:
+    metadata:
+      name: nnseg
+    spec:
+      containers:
+      - name: nnseg
+        image: lsx-harbor.informatik.uni-wuerzburg.de/zehe/farmseg:0.2
+        imagePullPolicy: "Always"
+        resources:
+          limits:
+            nvidia.com/gpu: "4"
+            cpu: "10"
+            memory: "30Gi"
+          requests:
+            nvidia.com/gpu: "4"
+            cpu: "10"
+            memory: "20Gi"
+        volumeMounts:
+        - mountPath: "/home/ls6/zehe"
+          name: home
+        - mountPath: "/scratch"
+          name: scratch
+        - mountPath: "/datasets"
+          name: datasets
+        command:
+          - bash
+          - "-c"
+          - "source /pip/bin/activate && cd && cd remote_python/code-2020-scenes/farmSeg && python -u train_fine.py --fold {{ fold_num }}"
+      restartPolicy: "OnFailure"
+      imagePullSecrets:
+      - name: harbor-zehe
+      volumes:
+      - name: home
+        cephfs:
+          monitors:
+          - 132.187.14.16,132.187.14.17,132.187.14.19,132.187.14.20
+          user: zehe
+          path: "/home/ls6/zehe"
+          secretRef:
+            name: ceph-secret-zehe
+      - name: scratch
+        cephfs:
+          monitors:
+          - 132.187.14.16,132.187.14.17,132.187.14.19,132.187.14.20
+          user: zehe
+          path: "/scratch"
+          secretRef:
+            name: ceph-secret-zehe
+      - name: datasets
+        cephfs:
+          monitors:
+          - 132.187.14.16,132.187.14.17,132.187.14.19,132.187.14.20
+          user: zehe
+          path: "/datasets"
+          secretRef:
+            name: ceph-secret-zehe
+

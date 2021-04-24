@@ -1,41 +1,31 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: embedding-{{ year }}-{{ month }}
+  name: bernstetter-template
   namespace: studbernstetter
   annotations:
-    description: "creating embeddings"
+    description: "template for doing anything in my home"
 spec:
   template:
     spec:
       priorityClassName: research-low
       imagePullSecrets:
-        - name: gitlab-registry-bernstetter
+        - name: gitlab-registry
       containers:
         - name: pythonbase
           image: gitlab2.informatik.uni-wuerzburg.de:4567/s319059/containers/pythonbase
           imagePullPolicy: "Always"
           resources:
             limits:
-              cpu: "6"
-              memory: "8Gi"
+              cpu: "2"
+              memory: "4Gi"
             requests:
-              cpu: "6"
-              memory: "8Gi"
+              cpu: "1"
+              memory: "4Gi"
           command:
             - "python3"
-            - "/home/stud/bernstetter/ma/embeddings/generate.py"
-            - "--input_dir=/home/stud/bernstetter/datasets/twitch_sampled/5Kx5K/month_corpusfiles/{{ year }}{{ month }}.txt"
-            - "--model_dir=/home/stud/bernstetter/models/twitch_sampled/timeseries/{{ year }}{{ month }}"
-            - "--worker_count=4"
-            - "--skipgram=1"
-            - "--word2vec=1"
-            - "--epoch_count=10"
-            - "--word_min_count=5"
-            - "--vector_size=128"
-            - "--window_size=5"
-            # Default values by room2glo
-            # --vector_size 200 --window_size 10 --min_count 500 --no_of_iter 15
+            - "path/to/file.py"
+            - "--input_argument=path/to/example"
           volumeMounts:
             - mountPath: /home/stud/bernstetter
               name: home

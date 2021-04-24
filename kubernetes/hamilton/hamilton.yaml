@@ -1,0 +1,50 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: tw-hamilton
+  namespace: studbernstetter
+  annotations:
+    description: "detect change"
+spec:
+  template:
+    spec:
+      priorityClassName: research-low
+      imagePullSecrets:
+        - name: gitlab-registry-bernstetter
+      containers:
+        - name: pythonbase
+          image: gitlab2.informatik.uni-wuerzburg.de:4567/s319059/containers/pythonbase
+          imagePullPolicy: "Always"
+          resources:
+            limits:
+              cpu: "8"
+              memory: "4Gi"
+            requests:
+              cpu: "8"
+              memory: "4Gi"
+          command:
+            - "python3"
+            - "/home/stud/bernstetter/ma/initial/semantic_change_detection/hamilton_semantic_change_measures.py"
+            - "--model1_filepath=/home/stud/bernstetter/models/twitch_sampled/201905/vec_128_w5_mc20_iter10_sg0_lc0_clean0_w2v1/saved_model.gensim"
+            - "--model2_filepath=/home/stud/bernstetter/models/twitch_sampled/202004/vec_128_w5_mc20_iter10_sg0_lc0_clean0_w2v1/saved_model.gensim"
+            - "--outfiles_dir=/home/stud/bernstetter/models/twitch_sampled/results/hamilton/vec_128_w5_mc20_iter10_sg0_lc0_clean0_w2v1/"
+            - "--targets=/home/stud/bernstetter/ma/initial/semantic_change_detection/targets/targets.csv"
+            - "--t_best=100"
+            - "--k_neighbors=5"
+            - "--frequency_threshold=20"
+            - "--cosine" 
+              #- "--cosine_unaligned"
+              #- "--neighborhood"
+          volumeMounts:
+            - mountPath: /home/stud/bernstetter
+              name: home
+      restartPolicy: "Never"
+      volumes:
+        - name: home
+          cephfs:
+            monitors:
+              - 132.187.14.16,132.187.14.17,132.187.14.19,132.187.14.20
+            user: studbernstetter
+            path: "/home/stud/bernstetter"
+            secretRef:
+              name: ceph-secret-studbernstetter
