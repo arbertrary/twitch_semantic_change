@@ -1,0 +1,9 @@
+FROM python:3.9
+
+RUN apt-get update && \
+    apt-get upgrade -y
+
+COPY base_requirements.txt ./
+RUN pip install --upgrade pip
+RUN pip install --no-cache-dir -r base_requirements.txt
+RUN python -c "import gensim, nltk, pandas, numpy, scipy; nltk.download('all', download_dir='/usr/local/nltk_data')"
