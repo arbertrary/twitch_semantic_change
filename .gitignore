@@ -1,0 +1,10 @@
+venv/
+*/__pycache__/
+.idea/
+emotes/ffz/
+chatlogs/
+eventlogs/
+models/
+testdata/
+semantic_change_detection/synth/changepoint/
+*.json

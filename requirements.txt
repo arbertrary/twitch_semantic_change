@@ -1,0 +1,10 @@
+tensorpack
+gensim
+jinja2
+nltk
+pandas
+numpy
+matplotlib
+sklearn
+scipy
+networkx
