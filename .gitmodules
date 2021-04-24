@@ -1,0 +1,3 @@
+[submodule "odenet"]
+	path = odenet
+	url = https://github.com/hdaSprachtechnologie/odenet.git
