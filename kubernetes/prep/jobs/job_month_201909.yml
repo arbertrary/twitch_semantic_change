@@ -1,0 +1,43 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: corpusfile-201909
+  namespace: studbernstetter
+  annotations:
+    description: "create emote corpus files"
+spec:
+  template:
+    spec:
+      priorityClassName: research-med
+      imagePullSecrets:
+        - name: gitlab-registry-bernstetter
+      containers:
+        - name: pythonbase
+          image: gitlab2.informatik.uni-wuerzburg.de:4567/s319059/containers/pythonbase
+          imagePullPolicy: "Always"
+          resources:
+            limits:
+              cpu: "12"
+              memory: "16Gi"
+            requests:
+              cpu: "12"
+              memory: "16Gi"
+          command:
+            - "python3"
+            - "/home/stud/bernstetter/ma/mainrepo/preprocessing/create_corpusfiles.py"
+            - "--infiles_rootdir=/home/stud/bernstetter/datasets/twitch/201909/clean_en_sorted/"
+            - "--outdir_path=/home/stud/bernstetter/datasets/twitch/201909/ungrouped_txt/"
+            - "--mode=u"
+          volumeMounts:
+            - mountPath: /home/stud/bernstetter
+              name: home
+      restartPolicy: "Never"
+      volumes:
+        - name: home
+          cephfs:
+            monitors:
+              - 132.187.14.16,132.187.14.17,132.187.14.19,132.187.14.20
+            user: studbernstetter
+            path: "/home/stud/bernstetter"
+            secretRef:
+              name: ceph-secret-studbernstetter

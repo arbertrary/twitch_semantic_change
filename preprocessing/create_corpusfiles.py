@@ -105,7 +105,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("-i", "--infiles_rootdir", type=str)
     parser.add_argument("-o", "--outdir_path")
-    parser.add_argument("-e", "--emote", type=int, default=0)
+    parser.add_argument("-m", "--mode", type=str, default="g")
 
     options = parser.parse_args()
 
@@ -113,14 +113,12 @@ if __name__ == '__main__':
     out_path = options.outdir_path
     os.makedirs(out_path, exist_ok=True)
 
-    if os.path.isfile(in_path):
-        ungrouped_corpusfile(in_path)
-        exit()
-    else:
-        pool = multiprocessing.Pool(11)
-        filelist = [os.path.join(in_path, file) for file in os.listdir(in_path)]
+    pool = multiprocessing.Pool(11)
+    filelist = [os.path.join(in_path, file) for file in os.listdir(in_path)]
 
-        if options.emote == 0:
-            pool.map(corpusfile, filelist)
-        else:
-            pool.map(emote_corpusfile, filelist)
+    if options.mode == "g":
+        pool.map(corpusfile, filelist)
+    elif options.mode == "u":
+        pool.map(ungrouped_corpusfile, filelist)
+    else:
+        pool.map(emote_corpusfile, filelist)
