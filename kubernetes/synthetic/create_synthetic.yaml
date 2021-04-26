@@ -17,18 +17,22 @@ spec:
           imagePullPolicy: "Always"
           resources:
             limits:
-              cpu: "4"
+              cpu: "6"
               memory: "8Gi"
             requests:
-              cpu: "4"
+              cpu: "6"
               memory: "8Gi"
           command:
             - "python3"
-            - "/home/stud/bernstetter/ma/initial/synthetic_data_generation/create_synthetic_dataset.py"
+            - "/home/stud/bernstetter/ma/mainrepo/synthetic_data_generation/create_synthetic_dataset.py"
             - "--input_filepath=/home/stud/bernstetter/datasets/synthetic_twitch2/ungrouped/concat_10p_cutoff_201911.txt"
-            - "--outfiles_rootdir=/home/stud/bernstetter/datasets/synthetic_twitch2/ungrouped/"
+            - "--outfiles_rootdir=/home/stud/bernstetter/datasets/synthetic_twitch2/ungrouped/3years/"
             - "--context_word_dict_filepath=/home/stud/bernstetter/datasets/synthetic_twitch2/context_word_dict.json"
             - "--pseudoword_dict_filepath=/home/stud/bernstetter/datasets/synthetic_twitch2/pseudoword_dict.json"
+            - "--start_year=2019"
+            - "--start_month=1"
+            - "--end_year=2021"
+            - "--end_month=12"
           volumeMounts:
             - mountPath: /home/stud/bernstetter
               name: home
