@@ -7,7 +7,6 @@ from gensim.test.utils import datapath
 
 assert gensim.models.word2vec.FAST_VERSION > -1
 from time import time
-from loader import ChatYielder
 import logging
 
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
