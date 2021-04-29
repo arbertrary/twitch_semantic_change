@@ -8,14 +8,16 @@ from nltk.corpus import stopwords
 import matplotlib.pyplot as plt
 import matplotlib
 from itertools import cycle
-
+import argparse
 
 # matplotlib.use('TkAgg')
 
 
-def get_wordcounts(in_dir, out_dir):
+def get_wordcounts(in_dir, out_dir, month):
+    c = Counter()
+    out_path = os.path.join(out_dir, "counts_" + month +".json")
+    
     for file in os.listdir(in_dir):
-        c = Counter()
         infile_path = os.path.join(in_dir, file)
 
         if not os.path.isfile(infile_path):
@@ -26,10 +28,9 @@ def get_wordcounts(in_dir, out_dir):
             for line in infile:
                 c.update(line.strip().split())
 
-        out_path = os.path.join(out_dir, "freq_" + file)
-
-        with open(out_path, "w") as outfile:
-            json.dump(OrderedDict(c.most_common()), outfile, indent=2)
+    c = {x: count for x, count in c.items() if count >= 100}
+    with open(out_path, "w") as outfile:
+        json.dump(OrderedDict(c), outfile, indent=2)
 
 
 def get_wordfreqs(in_dir, out_dir):
@@ -44,19 +45,20 @@ def get_wordfreqs(in_dir, out_dir):
         file_path = os.path.join(in_dir, filename)
 
         with open(file_path, "r") as infile:
-            json_data = json.load(infile)
+            data = infile.read()
+            json_data = json.loads(data)
             new_dict = {}
             total = sum(json_data.values())
 
             for key in json_data:
-                if json_data[key] < 20:
+                if json_data[key] < 100:
                     continue
                 vocab.add(key)
                 new_dict[key] = math.log(json_data[key] / total)
 
             month_dicts.append(new_dict)
 
-    with open(os.path.join(out_dir, "wc100_frequencies.csv"), "w") as csvfile:
+    with open(os.path.join(out_dir, "wc100_logfrequencies.csv"), "w") as csvfile:
         writer = csv.writer(csvfile)
 
         writer.writerow(
@@ -130,6 +132,15 @@ def plot_frequencies(diffs_file, words):
 
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--input_dir", type=str)
+    parser.add_argument("--output_dir", type=str)
+    parser.add_argument("--month", type=str)
+    options = parser.parse_args()
+
+    #get_wordcounts(options.input_dir, options.output_dir, options.month)
+    get_wordfreqs(options.input_dir, options.output_dir)
+
     # freqs = "../testdata2/wc100_logfrequencies.csv"
     # freqs = "../testdata2/wc20_logfrequencies.csv"
     # analyze_frequencies(freqs)
@@ -143,6 +154,6 @@ if __name__ == '__main__':
     # The emote YEP was submitted to FrankerFaceZ[2] for the first time on December 15th, 2019.
     # words = ["KEY", "YEP", "hoursBrotherhood", "!drop", "PauseChamp"]
 
-    plot_frequencies(diffs, words)
+    #plot_frequencies(diffs, words)
 
 

@@ -80,8 +80,6 @@ def corpusfile(in_filepath):
     df = pd.read_csv(in_filepath, sep=",")
     df.style.hide_index()
 
-    df = df["msg"]
-
     filename = os.path.basename(in_filepath)
 
     grouped_df = df.groupby("chid")
