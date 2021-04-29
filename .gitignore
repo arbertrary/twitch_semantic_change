@@ -1,4 +1,5 @@
 venv/
+**/jobs/
 */__pycache__/
 .idea/
 emotes/ffz/

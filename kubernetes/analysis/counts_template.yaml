@@ -1,10 +1,10 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: design-pseudowords
+  name: wordcount-test-{{ month }}
   namespace: studbernstetter
   annotations:
-    description: ""
+    description: "template for doing anything in my home"
 spec:
   template:
     spec:
@@ -20,17 +20,14 @@ spec:
               cpu: "4"
               memory: "8Gi"
             requests:
-              cpu: "4"
-              memory: "8Gi"
+              cpu: "1"
+              memory: "4Gi"
           command:
             - "python3"
-            - "/home/stud/bernstetter/ma/mainrepo/synthetic_data_generation/design_pseudowords.py"
-            - "--input_filepath=/home/stud/bernstetter/datasets/synthetic_twitch_3y/vocab_stats.csv"
-            - "--outfiles_rootdir=/home/stud/bernstetter/datasets/synthetic_twitch_3y/"
-            - "--start_year=2019"
-            - "--start_month=1"
-            - "--end_year=2021"
-            - "--end_month=12"
+            - "/home/stud/bernstetter/ma/mainrepo/analysis/frequency_analysis.py"
+            - "--input_dir=/home/stud/bernstetter/datasets/twitch/{{ month }}/ungrouped_txt/"
+            - "--output_dir=/home/stud/bernstetter/datasets/twitch/wordcounts/"
+            - "--month={{ month }}"  
           volumeMounts:
             - mountPath: /home/stud/bernstetter
               name: home

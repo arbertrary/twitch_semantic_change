@@ -26,8 +26,8 @@ spec:
             - "python3"
             - "/home/stud/bernstetter/ma/mainrepo/preprocessing/create_corpusfiles.py"
             - "--infiles_rootdir=/home/stud/bernstetter/datasets/twitch/{{ month }}/clean_en_sorted/"
-            - "--outdir_path=/home/stud/bernstetter/datasets/twitch/{{ month }}/ungrouped_txt/"
-            - "--mode=u"
+            - "--outdir_path=/home/stud/bernstetter/datasets/twitch/{{ month }}/30s_grouped_txt/"
+            - "--mode=g"
           volumeMounts:
             - mountPath: /home/stud/bernstetter
               name: home

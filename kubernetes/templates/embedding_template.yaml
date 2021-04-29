@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: embedding-{{ year }}-{{ month }}
+  name: embedding-{{ month }}-sg0-30s
   namespace: studbernstetter
   annotations:
     description: "creating embeddings"
@@ -18,20 +18,20 @@ spec:
           resources:
             limits:
               cpu: "6"
-              memory: "8Gi"
+              memory: "32Gi"
             requests:
-              cpu: "6"
+              cpu: "3"
               memory: "8Gi"
           command:
             - "python3"
             - "/home/stud/bernstetter/ma/mainrepo/embeddings/generate.py"
-            - "--input_dir=/home/stud/bernstetter/datasets/twitch_sampled/5Kx5K/month_corpusfiles/{{ year }}{{ month }}.txt"
-            - "--model_dir=/home/stud/bernstetter/models/twitch_sampled/timeseries/{{ year }}{{ month }}"
-            - "--worker_count=4"
-            - "--skipgram=1"
+            - "--input_dir=/home/stud/bernstetter/datasets/twitch/{{ month }}/30s_grouped_txt/"
+            - "--model_dir=/home/stud/bernstetter/models/twitch/30s_grouped/{{ month }}"
+            - "--worker_count=5"
+            - "--skipgram=0"
             - "--word2vec=1"
             - "--epoch_count=10"
-            - "--word_min_count=5"
+            - "--word_min_count=100"
             - "--vector_size=128"
             - "--window_size=5"
             # Default values by room2glo
