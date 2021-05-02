@@ -1,97 +1,137 @@
-import requests
-from bs4 import BeautifulSoup
-import os
+from requests_html import HTMLSession
 import re
 import csv
+import time
+
+BTTV_URL = "https://betterttv.com/emotes/global"
+FFZ_URL = lambda p: "https://www.frankerfacez.com/emoticons/?page={}".format(p)
+TWITCH_URL = "https://twitchemotes.com/"
 
 
-def get_bttv_globals():
-    # url = "https://betterttv.com/emotes/global"
-    # page = requests.get(url)
-    # soup = BeautifulSoup(page.content, "html.parser")
-    # print(soup.prettify())
-    with open("ffz/bttv_global.html") as page:
-        soup = BeautifulSoup(page.read(), "html.parser")
-        print(soup.prettify())
-        emotecards = soup.find("div", {"class": "EmoteCards_emoteCards__1lpxg"})
-        emotes = emotecards.find_all("a")
+def get_bttv_global():
+    r = session.get(BTTV_URL)
+    r.html.render()
 
-        with open("bttv_global_emotes.csv", "w") as csvfile:
-            csv_writer = csv.writer(csvfile)
-            csv_writer.writerow(["name", "id", "src"])
-            for emote in emotes:
-                emote_name = emote.find("div").text
-                # emote_src = emote.find("img")["src"]
-                href = emote.get("href")
-                emote_id = re.match(r".*emotes/(.*)", href).group(1)
-                emote_src = "https://cdn.betterttv.net/emote/{}/1x".format(emote_id)
+    time.sleep(5)
+    emotecards = r.html.find(".EmoteCards_emoteCards__1lpxg", first=True)
+    emotes = emotecards.find("a")
 
-                csv_writer.writerow([emote_name, emote_id, emote_src])
+    with open("bttv_global_emotes.csv", "w") as csvfile:
+        csv_writer = csv.writer(csvfile)
+        csv_writer.writerow(["name", "id", "src"])
+        print("Writing to file \"bttv_global_emotes.csv\"")
+        for emote in emotes:
+            emote_name = emote.find("div", first=True).text
+            href = emote.attrs.get("href")
+            emote_id = re.match(r".*emotes/(.*)", href).group(1)
+            emote_src = "https://cdn.betterttv.net/emote/{}/1x".format(emote_id)
+
+            csv_writer.writerow([emote_name, emote_id, emote_src])
 
 
-def get_ffz_list():
-    ffz_dir = "ffz"
+def get_ffz_new():
     ffz_dict = {}
-    for filename in sorted(os.listdir(ffz_dir)):
-        # print(filename)
-        if filename.endswith(".html"):
-            with open(os.path.join(ffz_dir, filename)) as file:
-                soup = BeautifulSoup(file.read(), "html.parser")
-                emotes = soup.find_all("tr", {"class": "selectable"})
-                for emote in emotes:
-                    a = emote.find("td", {"class": "emote-name"}).find("a")
-                    emote_name = a.text
-                    emote_id = re.match(r".*/(\d*)-(.*)", a.get("href")).group(1)
-                    emote_source = "https://cdn.frankerfacez.com/emoticon/{}/1".format(emote_id)
-                    count = int(emote.find("td", {"class": None}).text.replace(",", ""))
+    for page in range(1, 11):
+        url = FFZ_URL(page)
+        r = session.get(url)
+        print("Sleeping for 2 seconds")
+        time.sleep(2)
 
-                    emote_dict = {"id": emote_id, "count": count, "src": emote_source}
+        emotes = r.html.find(".selectable")
 
-                    if ffz_dict.get(emote_name):
-                        ffz_dict[emote_name]["count"] += count
-                    else:
-                        ffz_dict[emote_name] = emote_dict
+        for emote in emotes:
+            a = emote.find(".emote-name", first=True).find("a", first=True)
+            emote_name = a.text
+            emote_id = re.match(r".*/(\d*)-(.*)", a.attrs.get("href")).group(1)
+            emote_source = "https://cdn.frankerfacez.com/emoticon/{}/1".format(emote_id)
 
-    print(ffz_dict)
+            emote_dict = {"id": emote_id, "src": emote_source}
+
+            ffz_dict[emote_name] = emote_dict
 
     with open("ffz_emotes.csv", "w") as csvfile:
         writer = csv.writer(csvfile)
-        writer.writerow(["name", "id", "count", "src"])
+        writer.writerow(["name", "id", "src"])
+        print("Writing to file \"ffz_emotes.csv\"")
+
         for emote in ffz_dict:
             emote_dict = ffz_dict[emote]
-            writer.writerow([emote, emote_dict["id"], emote_dict["count"], emote_dict["src"]])
+            writer.writerow([emote, emote_dict["id"], emote_dict["src"]])
 
 
-def get_twitch_global(html_path):
-    with open(html_path) as file:
-        soup = BeautifulSoup(file.read(), "html.parser")
-        emotes = soup.find_all("a", {"class": "emote-name"})
-        # < img
-        # src = "https://static-cdn.jtvnw.net/emoticons/v1/191762/1.0"
-        # data - tooltip = "<strong>Squid1</strong>"
-        # data - regex = "Squid1"
-        # data - toggle = "popover"
-        # data - image - id = "191762"
-        #
-        # class ="emote expandable-emote" >
-        with open("global_emotes.csv", "w") as csvfile:
-            writer = csv.writer(csvfile)
-            writer.writerow(["name", "id", "src"])
+def get_twitch_global():
+    r = session.get(TWITCH_URL)
+    emotes = r.html.find(".emote-name")
 
-            for emote in emotes:
-                img = emote.find("img")
-                emote_source = img["src"]
-                emote_name = img["data-regex"]
-                emote_id = img["data-image-id"]
-                # emote_dict = {"name": emote_name, "id": emote_id, "src": emote_source}
+    with open("twitch_global_emotes.csv", "w") as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerow(["name", "id", "src"])
+        print("Writing to file \"twitch_global_emotes.csv\"")
 
-                writer.writerow([emote_name, emote_id, emote_source])
+        for emote in emotes:
+            img = emote.find("img", first=True).attrs
+            emote_source = img["src"]
+            emote_name = img["data-regex"]
+            emote_id = img["data-image-id"]
 
-                print(emote_name, emote_id, emote_source)
+            writer.writerow([emote_name, emote_id, emote_source])
 
 
 if __name__ == '__main__':
-    get_twitch_global("../testdata/twitch_global_emotes/Twitch Emotes - Bringing a little Kappa to you everyday.html")
-    # get_ffz_list()
-    # get_bttv_globals()
-    # print("asd")
+    print("# SCRIPT COULD POSSIBLY FAIL ON FIRST RUN\n"
+          "Maybe something with the HTMLSession.\n"
+          "Just run it again, it should succeed then.")
+    session = HTMLSession()
+    print("# Getting BTTV global emotes")
+    get_bttv_global()
+    print("# Getting original Twitch global emotes")
+    get_twitch_global()
+    print("# Getting top 500 FFZ emotes (contains duplicates. resulting list of emotes might be shorter)")
+    get_ffz_new()
+
+## Old versions with beautifulsoup and requests
+# def get_twitch_global():
+#     page = requests.get(TWITCH_URL)
+#     soup = BeautifulSoup(page.content, "html.parser")
+#     emotes = soup.find_all("a", {"class": "emote-name"})
+#
+#     with open("twitch_global_emotes.csv", "w") as csvfile:
+#         writer = csv.writer(csvfile)
+#         writer.writerow(["name", "id", "src"])
+#         print("Writing to file \"twitch_global_emotes.csv\"")
+#
+#         for emote in emotes:
+#             img = emote.find("img")
+#             emote_source = img["src"]
+#             emote_name = img["data-regex"]
+#             emote_id = img["data-image-id"]
+#
+#             writer.writerow([emote_name, emote_id, emote_source])
+
+# def get_ffz():
+#     ffz_dict = {}
+#     for page in range(1, 11):
+#         url = FFZ_URL(page)
+#         page = requests.get(url)
+#         print("Sleeping for 2 seconds")
+#         time.sleep(2)
+#         soup = BeautifulSoup(page.content, "html.parser")
+#         emotes = soup.find_all("tr", {"class": "selectable"})
+#         for emote in emotes:
+#             a = emote.find("td", {"class": "emote-name"}).find("a")
+#             emote_name = a.text
+#             emote_id = re.match(r".*/(\d*)-(.*)", a.get("href")).group(1)
+#             emote_source = "https://cdn.frankerfacez.com/emoticon/{}/1".format(emote_id)
+#
+#             emote_dict = {"id": emote_id, "src": emote_source}
+#
+#             ffz_dict[emote_name] = emote_dict
+#
+#     with open("ffz_emotes.csv", "w") as csvfile:
+#         writer = csv.writer(csvfile)
+#         writer.writerow(["name", "id", "src"])
+#         print("Writing to file \"ffz_emotes.csv\"")
+#
+#         for emote in ffz_dict:
+#             emote_dict = ffz_dict[emote]
+#             writer.writerow([emote, emote_dict["id"], emote_dict["src"]])
