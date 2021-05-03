@@ -10,26 +10,28 @@ import matplotlib
 from itertools import cycle
 import argparse
 
+
 # matplotlib.use('TkAgg')
 
 def temp_get_wordcounts(in_dir, out_dir):
     for file in os.listdir(in_dir):
         infile_path = os.path.join(in_dir, file)
         print(infile_path)
-        out_path = os.path.join(out_dir, "pseudoword_counts_" + file +".json")
+        out_path = os.path.join(out_dir, "pseudoword_counts_" + file + ".json")
         c = Counter()
         with open(infile_path, "r") as infile:
             print("# file: " + infile_path)
             for line in infile:
                 c.update(line.strip().split())
-        c = {x : count for x, count in sorted(c.items(), key=lambda item:item[0]) if count >= 100 and "pseudoword" in x}
+        c = {x: count for x, count in sorted(c.items(), key=lambda item: item[0]) if count >= 100 and "pseudoword" in x}
         with open(out_path, "w") as outfile:
             json.dump(OrderedDict(c), outfile, indent=2)
 
+
 def get_wordcounts(in_dir, out_dir, month):
     c = Counter()
-    out_path = os.path.join(out_dir, "counts_" + month +".json")
-    
+    out_path = os.path.join(out_dir, "counts_" + month + ".json")
+
     for file in os.listdir(in_dir):
         infile_path = os.path.join(in_dir, file)
 
@@ -112,7 +114,7 @@ def analyze_frequencies(frequency_file):
     df = df.drop(todrop)
     df = df.sort_values("MaxDiff", ascending=False)
 
-    df.to_csv("../testdata2/wc20_maxdiffs_log.csv", index=False)
+    df.to_csv("../data/freq_analysis/wc100_maxdiffs_log.csv", index=False)
     # print(df.head(20))
 
 
@@ -137,38 +139,33 @@ def plot_frequencies(diffs_file, words):
     fig.set_size_inches(10, 5)
     ax.set_xlabel('Months')  # Add an x-label to the axes.
     ax.set_ylabel('log frequency')  # Add a y-label to the axes.
-    ax.set_title("Log Frequency of Words related to the Blitzchung Controversy")  # Add a title to the axes.
+    ax.set_title("Log Frequency of selected \"meme\" words")  # Add a title to the axes.
     ax.legend()  # Add a legend.
 
-    plt.savefig("covid_freqs.png")
+    plt.savefig("/home/armin/masterarbeit/thesis/ausarbeitung/pics/figures/meme_freqs.png")
     plt.show()
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--input_dir", type=str)
-    parser.add_argument("--output_dir", type=str)
-    parser.add_argument("--month", type=str)
-    options = parser.parse_args()
-    
-    print("I'M HERE")
-    temp_get_wordcounts(options.input_dir, options.output_dir)
-    #get_wordcounts(options.input_dir, options.output_dir, options.month)
-    #get_wordfreqs(options.input_dir, options.output_dir)
+    # parser = argparse.ArgumentParser()
+    # parser.add_argument("--input_dir", type=str)
+    # parser.add_argument("--output_dir", type=str)
+    # parser.add_argument("--month", type=str)
+    # options = parser.parse_args()
+    #
+    # #get_wordcounts(options.input_dir, options.output_dir, options.month)
+    # get_wordfreqs(options.input_dir, options.output_dir)
 
     # freqs = "../testdata2/wc100_logfrequencies.csv"
-    # freqs = "../testdata2/wc20_logfrequencies.csv"
+    freqs = "../data/freq_analysis/wc100_logfrequencies.csv"
+    diffs = "../data/freq_analysis/wc100_maxdiffs_log.csv"
     # analyze_frequencies(freqs)
 
-    # diffs = "../testdata2/maxdiffs_log.csv"
-    diffs = "../testdata2/wc20_maxdiffs_log.csv"
-    # words = ["SIMP", "simp", "boomer", "ninja"]
-    # words =["hongkong", "blizzard", "revolution", "china","hong", "kong"]
+    words = ["simp", "boomer", "mald", "KEKW"]
+    # words = ["hongkong", "blizzard", "revolution", "china", "hong", "kong", "censorship"]
     # words = ["PogChamp", "Pog", "Poggers", "EleGiggle", "TriHard"]
-    words = ["rona", "lockdown", "corona", "quarantine", "virus"]
+    # words = ["rona", "lockdown", "corona", "quarantine", "virus", "stimulus"]
     # The emote YEP was submitted to FrankerFaceZ[2] for the first time on December 15th, 2019.
     # words = ["KEY", "YEP", "hoursBrotherhood", "!drop", "PauseChamp"]
 
-    #plot_frequencies(diffs, words)
-
-
+    plot_frequencies(diffs, words)

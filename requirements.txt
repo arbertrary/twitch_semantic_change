@@ -8,3 +8,6 @@ matplotlib
 sklearn
 scipy
 networkx
+bs4
+requests
+tqdm
