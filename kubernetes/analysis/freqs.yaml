@@ -25,8 +25,8 @@ spec:
           command:
             - "python3"
             - "/home/stud/bernstetter/ma/mainrepo/analysis/frequency_analysis.py"
-            - "--input_dir=/home/stud/bernstetter/datasets/twitch/wordcounts/raw_counts"
-            - "--output_dir=/home/stud/bernstetter/datasets/twitch/wordcounts/"
+            - "--input_dir=/home/stud/bernstetter/datasets/synthetic_twitch/ungrouped/subsampled_70/"
+            - "--output_dir=/home/stud/bernstetter/datasets/synthetic_twitch/ungrouped/pseudowordcounts/"
           volumeMounts:
             - mountPath: /home/stud/bernstetter
               name: home

@@ -12,6 +12,19 @@ import argparse
 
 # matplotlib.use('TkAgg')
 
+def temp_get_wordcounts(in_dir, out_dir):
+    for file in os.listdir(in_dir):
+        infile_path = os.path.join(in_dir, file)
+        print(infile_path)
+        out_path = os.path.join(out_dir, "pseudoword_counts_" + file +".json")
+        c = Counter()
+        with open(infile_path, "r") as infile:
+            print("# file: " + infile_path)
+            for line in infile:
+                c.update(line.strip().split())
+        c = {x : count for x, count in sorted(c.items(), key=lambda item:item[0]) if count >= 100 and "pseudoword" in x}
+        with open(out_path, "w") as outfile:
+            json.dump(OrderedDict(c), outfile, indent=2)
 
 def get_wordcounts(in_dir, out_dir, month):
     c = Counter()
@@ -137,9 +150,11 @@ if __name__ == '__main__':
     parser.add_argument("--output_dir", type=str)
     parser.add_argument("--month", type=str)
     options = parser.parse_args()
-
+    
+    print("I'M HERE")
+    temp_get_wordcounts(options.input_dir, options.output_dir)
     #get_wordcounts(options.input_dir, options.output_dir, options.month)
-    get_wordfreqs(options.input_dir, options.output_dir)
+    #get_wordfreqs(options.input_dir, options.output_dir)
 
     # freqs = "../testdata2/wc100_logfrequencies.csv"
     # freqs = "../testdata2/wc20_logfrequencies.csv"
