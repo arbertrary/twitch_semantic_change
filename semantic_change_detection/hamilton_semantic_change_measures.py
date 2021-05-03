@@ -304,6 +304,22 @@ if __name__ == "__main__":
         model2 = model2.wv
         model2.init_sims(replace=True)
 
+        if options.cosine:
+            n_best_by_cosine = rank_by_cosine(model1, model2, options.model1_filepath, options.model2_filepath,
+                                              n=options.t_best, f=options.frequency_threshold, target_words=targets)
+
+            print("Done ranking by cosine distance measure.")
+
+            os.makedirs(options.outfiles_dir, exist_ok=True)
+            outfilepath = options.outfiles_dir + '/cosine.tsv'
+
+            with open(outfilepath, 'w') as outfile:
+                for (i, item) in enumerate(n_best_by_cosine):
+                    outfile.write('{}\t{}\t{}\n'.format(i, item[0], item[1]))
+
+            write_logfile(outfilepath, options, start_time)
+            print(" Output and log file written to {}".format(options.outfiles_dir))
+        
         if options.neighborhood:
             n_best_by_neighborhood = rank_by_neighbourhood_shift(model1, model2, options.model1_filepath,
                                                                  options.model2_filepath, n=options.t_best,
@@ -322,18 +338,3 @@ if __name__ == "__main__":
             write_logfile(outfilepath, options, start_time)
             print("Output and log file written to {}".format(options.outfiles_dir))
 
-        if options.cosine:
-            n_best_by_cosine = rank_by_cosine(model1, model2, options.model1_filepath, options.model2_filepath,
-                                              n=options.t_best, f=options.frequency_threshold, target_words=targets)
-
-            print("Done ranking by cosine distance measure.")
-
-            os.makedirs(options.outfiles_dir, exist_ok=True)
-            outfilepath = options.outfiles_dir + '/cosine.tsv'
-
-            with open(outfilepath, 'w') as outfile:
-                for (i, item) in enumerate(n_best_by_cosine):
-                    outfile.write('{}\t{}\t{}\n'.format(i, item[0], item[1]))
-
-            write_logfile(outfilepath, options, start_time)
-            print(" Output and log file written to {}".format(options.outfiles_dir))
