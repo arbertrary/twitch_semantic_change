@@ -1,0 +1,25 @@
+INPUT FILE: /home/stud/bernstetter/models/dta/timeseries_results/sg1/time_series_analysis_standardized_output_f1600_l1900_afirst_cfirst_mcosine_k5_s1000_p0.05_g0_v50.tsv
+UP TO: 100
+
+
+# 5
+# JeSemE contains Schaar
+	Changepoint: 1800
+# 6
+# JeSemE contains Schuler
+	Changepoint: 1850
+# 9
+# JeSemE contains Sohns
+	Changepoint: 1800
+# 38
+# JeSemE contains angeordnet
+	Changepoint: 1850
+# 39
+# JeSemE contains befördert
+	Changepoint: 1850
+# 40
+# JeSemE contains angefangen
+	Changepoint: 1850
+# 41
+# JeSemE contains Antrieb
+	Changepoint: 1850

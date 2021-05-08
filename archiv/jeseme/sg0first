@@ -1,0 +1,275 @@
+python jeseme_getter.py --in_file=/home/stud/bernstetter/models/dta/timeseries_results/sg0/time_series_analysis_standardized_output_f1600_l1900_afirst_cfirst_mcosine_k5_s1000_p0.05_g0_v50.tsv --up_to=100
+# 0
+# JeSemE contains Netz
+	Changepoint: 1850
+	relevant: eher nein
+- bis 1840 im Kontext mit "Magen", ab 1810 im Kontext mit "spinnen"
+- das ist vmtl nur den ausgewählten texten zu schulden
+
+# 2
+# JeSemE contains verkehren
+	Changepoint: 1850
+	relevant: nein
+- kein untershciedlicher kontext erkennbar in jeseme graph
+
+# 4
+# JeSemE contains Leiter
+	Changepoint: 1850
+	relevant: sehr
+- ab 1810 bzw 1840 Kontext mit Strom/Elektrizität
+- Kontext mit "Trommel" fällt weg (kA was der bedeutet)
+
+# 5
+# JeSemE contains tätig
+	Changepoint: 1850
+	relevant: vielleicht
+- Kontext mit "Prinzip" verschwindet, bei PPMI steigt ab 1870 Kontext mit "Muskel"
+
+# 7
+# JeSemE contains bemächtigen
+	Changepoint: 1850
+	relevant: ja
+- ab 1840 kommt der Kontext mit "Beute" dazu
+# 8
+# JeSemE contains wirken
+	Changepoint: 1850
+	relevant: eher nein
+- Es gibt änderungen im Kontext ab 1780 aber nicht wirklich im 1850-1899 zeitraum
+
+# 9
+# JeSemE contains no
+	Changepoint: 1850
+	relevant: no
+
+# 10
+# JeSemE contains geneigt
+	Changepoint: 1850
+	relevant: vielleicht
+- ab 1840s geht Kontext mit "gegen" nach unten ...
+
+# 11
+# JeSemE contains Einfall
+	Changepoint: 1850
+	relevant: ja
+- ab 1840s steigt Kontext mit "geistreich"
+
+# 13
+# JeSemE contains Blatt
+	Changepoint: 1850
+	relevant: nein
+
+# 16
+# JeSemE contains Lehrer
+	Changepoint: 1850
+	relevant: nein
+
+# 22
+# JeSemE contains danach
+	Changepoint: 1850
+	relevant: nein
+
+# 23
+# JeSemE contains Verkehr
+	Changepoint: 1700
+	relevant: vielleicht
+- jeseme: Kontext mit "Gewerbe" und "Ware" geht nach 1780s deutlich runter.
+- schon vorher gestartet?
+
+# 26
+# JeSemE contains Schaar
+	Changepoint: 1800
+	relevant: ja
+- Kontext mit "dicht" geht stark hoch
+- Kontexte "schwärmen" und "geschließen" gehen runter
+
+# 27
+# JeSemE contains jenseits
+	Changepoint: 1850
+	relevant: nein
+
+# 28
+# JeSemE contains bilden
+	Changepoint: 1850
+	relevant: ja
+- Kontext mit "Grundlage" steigt
+- Kontext mit "Regel" fällt
+
+# 29
+# JeSemE contains gründen
+	Changepoint: 1850
+	relevant: nein
+
+# 31
+# JeSemE contains Bad
+	Changepoint: 1850
+	relevant: ja
+- ist allerdings ein etwas unspannendes wort
+
+# 33
+# JeSemE contains leiten
+	Changepoint: 1850
+	relevant: ja
+- allerdings quasi dasselbe wie Leiter
+
+# 35
+# JeSemE contains Character
+	Changepoint: 1650
+	relevant: nein
+- changepoint zu früh für Jeseme
+
+# 39
+# JeSemE contains Ferdinand
+	Changepoint: 1850
+	relevant: nein
+
+# 41
+# JeSemE contains verwendet
+	Changepoint: 1750
+	relevant: ja
+- in 1750-1799 sinkt Kontext mit "Befriedigung", "man" steigt
+
+# 42
+# JeSemE contains Huldigung
+	Changepoint: 1850
+	relevant: nein
+
+# 47
+# JeSemE contains Landschaft
+	Changepoint: 1850
+	relevant: ja
+
+# 49
+# JeSemE contains Bahn
+	Changepoint: 1850
+	relevant: nein
+
+# 50
+# JeSemE contains angefangen
+	Changepoint: 1850
+	relevant: nein
+# 52
+# JeSemE contains Sohns
+	Changepoint: 1800
+	relevant: nein
+# 55
+# JeSemE contains anbringen
+	Changepoint: 1850
+	relevant: nein
+# 58
+# JeSemE contains Definition
+	Changepoint: 1700
+- changepoint zu früh
+
+# 59
+# JeSemE contains Publikum
+	Changepoint: 1700
+- zu früh
+
+# 61
+# JeSemE contains bearbeiten
+	Changepoint: 1700
+- zu früh
+
+# 62
+# JeSemE contains Herbst
+	Changepoint: 1850
+	relevant: nein
+
+# 67
+# JeSemE contains verbinden
+	Changepoint: 1850
+	relevant: nein
+
+# 69
+# JeSemE contains anschließen
+	Changepoint: 1700
+- zu früh
+
+# 73
+# JeSemE contains betreiben
+	Changepoint: 1650
+- zu früh
+
+# 74
+# JeSemE contains studieren
+	Changepoint: 1850
+	relevant: nein
+
+# 76
+# JeSemE contains Fahne
+	Changepoint: 1850
+	relevant: nein
+# 77
+# JeSemE contains Spanier
+	Changepoint: 1850
+	relevant: nein
+# 79
+# JeSemE contains geführt
+	Changepoint: 1850
+	relevant: nein
+
+# 80
+# JeSemE contains Vergleich
+	Changepoint: 1800
+	relevant: sehr
+- massiver kontext change um 1820 (exakt changepoint periode)
+
+# 82
+# JeSemE contains nachher
+	Changepoint: 1700
+- zu früh
+
+# 84
+# JeSemE contains Sonn
+	Changepoint: 1800
+	relevant: nein
+
+# 86
+# JeSemE contains geleitet
+	Changepoint: 1750
+	relevant: nein
+
+# 89
+# JeSemE contains Übergang
+	Changepoint: 1700
+- zu früh
+
+# 90
+# JeSemE contains heraus
+	Changepoint: 1850
+	relevant: vielleicht
+
+# 91
+# JeSemE contains Auflage
+	Changepoint: 1850
+	relevant: nein
+
+# 92
+# JeSemE contains weilen
+	Changepoint: 1850
+	relevant: vielleicht
+- kontext change ist sichtbar aber langweiliges wort
+
+# 94
+# JeSemE contains antreiben
+	Changepoint: 1850
+# 95
+# JeSemE contains heissen
+	Changepoint: 1850
+	relevant: nein
+
+# 97
+# JeSemE contains Pause
+	Changepoint: 1700
+	relevant: nein
+# 98
+# JeSemE contains für
+	Changepoint: 1850
+	relevant: nein
+
+additional:
+
+# 184
+# JeSemE contains ergeben
+	Changepoint: 1750
+	relevant: sehr
