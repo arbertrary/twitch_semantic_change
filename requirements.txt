@@ -11,3 +11,4 @@ networkx
 bs4
 requests
 tqdm
+requests_html
