@@ -1,5 +1,5 @@
 tensorpack
-gensim
+gensim==3.8.3
 jinja2
 nltk
 pandas
