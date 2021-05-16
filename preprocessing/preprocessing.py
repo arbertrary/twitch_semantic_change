@@ -138,6 +138,66 @@ def clean_old_chatlogs(infilepath: str, outfiles_rootdir, emotes_dict: dict[str,
 
     logging.info(file)
 
+
+def clean_djinn4_chatlogs(infilepath: str, outfiles_rootdir, emotes_dict: dict[str, str], channels_dict, users_dict):
+    # filename = infilepath[-16:]
+    filename = re.match(r".*_(\d{12}.txt).*", file).group(1)
+
+    outfilepath = os.path.join(outfiles_rootdir, filename)
+    with open(infilepath, "r") as infile:
+        outstrings = []
+        for line in infile.readlines():
+            msg_data = json.loads(line)
+            lng = msg_data.get("lng")
+            if lng != "en":
+                continue
+
+            # viewercount = int(msg_data.get("vcnt"))
+
+            timestamp = msg_data.get("ts")
+            emote_only = msg_data.get("emo")
+            r9k = msg_data.get("r9k")
+            chid = msg_data.get("chid")
+            # channelname = msg_data.get("ch")
+
+            # if chid in channels_dict:
+            #     channels_dict.get(chid).get("vcnt").append(viewercount)
+            # else:
+            #     channel = {"ch": channelname, "vcnt": [viewercount]}
+            #     channels_dict[chid] = channel
+
+            usid = msg_data.get("usid")
+            # username = msg_data.get("un")
+            uemo = msg_data.get("uemo")
+            sub = msg_data.get("sub")
+            mod = msg_data.get("mod")
+
+            # users_dict[usid] = username
+
+            msg = msg_data.get("msg")
+
+            game = msg_data.get("game")
+
+            # TODO: clean message string here
+            # msg_text = clean_message(msg_text)
+            ext_emotes = external_emote_ranges(msg, emotes_dict)
+
+            outList = [timestamp, chid, msg, uemo, ext_emotes, game, usid, sub, mod, emote_only, r9k]
+            outstrings.append(outList)
+
+        infile.close()
+
+        with open(outfilepath, "w") as outfile:
+
+            csv_writer = csv.writer(outfile)
+            csv_writer.writerow(
+                ["ts", "chid", "msg", "emotes", "extemotes", "game", "usid", "sub", "mod", "emonly", "r9k"])
+            outstrings.sort(key=operator.itemgetter(1, 0))
+            for msg in outstrings:
+                csv_writer.writerow(msg)
+    logging.info(file)
+
+
 def clean_message(message: str):
     """
     shorten repetitions of letters etc.
@@ -159,6 +219,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("-i", "--infiles_rootdir", type=str,
                         help="path to a chatlog directory; Under this directory only files should be located")
+    parser.add_argument("-o", "--outfiles_dir", type=str)
     parser.add_argument("-f", "--ffz", type=str, help="path to the ffz emotes csv")
     parser.add_argument("-b", "--bttv", type=str, help="path to the bttv emotes csv")
     parser.add_argument("-mp", "--multi", type=int, default=0, help="whether to use multiprocessing")
@@ -175,7 +236,7 @@ if __name__ == '__main__':
     ffz_path = os.path.abspath(options.ffz)
     bttv_path = os.path.abspath(options.bttv)
     in_root = os.path.abspath(options.infiles_rootdir)
-    out_root = in_root.replace("raw", "clean_en_only_multi")
+    out_root = os.path.abspath(options.outfiles_dir)
 
     print(ffz_path)
     print(bttv_path)
@@ -186,7 +247,7 @@ if __name__ == '__main__':
     #                               "/home/stud/bernstetter/ma/initial/emotes/bttv_global_emotes.csv")
     emotes_dict = external_emotes(options.ffz, options.bttv)
 
-    pool = multiprocessing.Pool(6)
+    pool = multiprocessing.Pool(10)
 
     for file in os.listdir(in_root):
         chatlog_path = os.path.join(in_root, file)
@@ -201,9 +262,9 @@ if __name__ == '__main__':
                 continue
         try:
             if options.multi == 1:
-                pool.apply_async(clean_old_chatlogs, (chatlog_path, out_root, emotes_dict, ch_dict, us_dict))
+                pool.apply_async(clean_djinn4_chatlogs, (chatlog_path, out_root, emotes_dict, ch_dict, us_dict))
             else:
-                clean_old_chatlogs(chatlog_path, out_root, emotes_dict, ch_dict, us_dict)
+                clean_djinn4_chatlogs(chatlog_path, out_root, emotes_dict, ch_dict, us_dict)
         except json.decoder.JSONDecodeError as e:
             print(chatlog_path)
             logging.error("# JSON ERROR AT: " + chatlog_path)
@@ -234,7 +295,8 @@ if __name__ == '__main__':
         pass
     # with open(os.path.abspath(os.path.join(options.infiles_rootdir, os.pardir, "users.json")), "w") as users:
     #    json.dump(us_dict, users)
-    with open(os.path.abspath(os.path.join(options.infiles_rootdir, os.pardir, "channels_vcnt_mp.json")), "w") as channels:
-        json.dump(ch_dict, channels)
+    # with open(os.path.abspath(os.path.join(options.infiles_rootdir, os.pardir, "channels_vcnt_mp.json")),
+    #           "w") as channels:
+    #     json.dump(ch_dict, channels)
 
     print("--- %s seconds ---" % (time.time() - start_time))
