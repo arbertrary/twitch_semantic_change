@@ -153,16 +153,27 @@ def rank_by_cosine(model1, model2, model1_filepath, model2_filepath, n, f, targe
     # sys.stdout.write('\nALIGNED EMBEDDINGS')
 
     dists = []
-    for word in model1.vocab:
+    culled_vocab = [(word, model1.vocab[word].count) for word in model1.vocab]
+    culled_vocab.sort(key=lambda tup: tup[1])
+    culled_vocab = culled_vocab[int(len(culled_vocab)*f):]
+
+    culled_vocab2 = [(word, model2.vocab[word].count) for word in model2.vocab]
+    culled_vocab2.sort(key=lambda tup: tup[1])
+    culled_vocab2 = culled_vocab2[int(len(culled_vocab2)*f):]
+
+    intersection_set = set.intersection(set([x[0] for x in culled_vocab]), set([x[0] for x in culled_vocab2]))
+
+    for word in intersection_set:
         if len(target_words) != 0 and word not in target_words:
             continue
 
         if (word.startswith("!") or word.startswith("@") or word.startswith("http") or (
                 word[-1] in string.punctuation) or (word[0] in string.punctuation)):
             continue
-        if model1.vocab[word].count > f and model2.vocab[word].count > f:
-            dist = cosine(model1[word], model2[word])
-            dists.append((word, dist))
+        #if model1.vocab[word].count > f and model2.vocab[word].count > f:
+        dist = cosine(model1[word], model2[word])
+        dists.append((word, dist))
+    
     # sys.stdout.write('\nGOT DISTS')
 
     dists.sort(key=lambda x: x[1], reverse=True)
@@ -170,20 +181,30 @@ def rank_by_cosine(model1, model2, model1_filepath, model2_filepath, n, f, targe
 
     sys.stdout.write("\n{}\n Model1: {}\n Model2: {}".format(datetime.datetime.now(), model1_filepath, model2_filepath))
     sys.stdout.write("\n Params:-  f: {}  t: {}\n\n".format(f, n))
+    sys.stdout.write("\n Length of 10p culled vocab = {}\n\n".format(len(culled_vocab)))
+    thresh100 = [word for word in model1.vocab if model1.vocab[word].count > 100 and model2.vocab[word].count > 100]
+    thresh500 = [word for word in model1.vocab if model1.vocab[word].count > 500 and model2.vocab[word].count > 500]
+    thresh1000 = [word for word in model1.vocab if model1.vocab[word].count > 1000 and model2.vocab[word].count > 1000]
+    sys.stdout.write("\n Length of threshold 100 vocab = {}\n\n".format(len(thresh100)))
+    sys.stdout.write("\n Length of threshold 500 vocab = {}\n\n".format(len(thresh500)))
+    sys.stdout.write("\n Length of threshold 1000 vocab = {}\n\n".format(len(thresh1000)))
+    sys.stdout.write("\n Length of intersection set = {}\n\n".format(len(intersection_set)))
 
-    sys.stdout.write('\n============================')
-    sys.stdout.write('\n============================')
-    sys.stdout.write('\nTOP WORDS BY COSINE DIST')
-    sys.stdout.write('\n============================')
-    sys.stdout.write('\n============================')
-    sys.stdout.write('\n\n')
+    sys.stdout.write("\n\n{}".format(culled_vocab))
 
-    for d in dists[:n]:
-        sys.stdout.write(d[0])
-        sys.stdout.write('\n============================')
-        sys.stdout.write('\nModel1: ' + ' '.join([w for w, c in model1.most_similar(d[0], topn=10)]))
-        sys.stdout.write('\nModel2: ' + ' '.join([w for w, c in model2.most_similar(d[0], topn=10)]))
-        sys.stdout.write('\n\n')
+    #sys.stdout.write('\n============================')
+    #sys.stdout.write('\n============================')
+    #sys.stdout.write('\nTOP WORDS BY COSINE DIST')
+    #sys.stdout.write('\n============================')
+    #sys.stdout.write('\n============================')
+    #sys.stdout.write('\n\n')
+
+    #for d in dists[:n]:
+    #    sys.stdout.write(d[0])
+    #    sys.stdout.write('\n============================')
+    #    sys.stdout.write('\nModel1: ' + ' '.join([w for w, c in model1.most_similar(d[0], topn=10)]))
+    #    sys.stdout.write('\nModel2: ' + ' '.join([w for w, c in model2.most_similar(d[0], topn=10)]))
+    #    sys.stdout.write('\n\n')
 
     return dists[:n]
 
@@ -193,16 +214,26 @@ def rank_by_neighbourhood_shift(model1, model2, model1_filepath, model2_filepath
     # sys.stdout.write('\nLIMITED TO COMMON VOCABULARY')
 
     dists = []
-    for word in model1.vocab:
+    culled_vocab = [(word, model1.vocab[word].count) for word in model1.vocab]
+    culled_vocab.sort(key=lambda tup: tup[1])
+    culled_vocab = culled_vocab[int(len(culled_vocab)*f):]
+
+    culled_vocab2 = [(word, model2.vocab[word].count) for word in model2.vocab]
+    culled_vocab2.sort(key=lambda tup: tup[1])
+    culled_vocab2 = culled_vocab2[int(len(culled_vocab2)*f):]
+
+    intersection_set = set.intersection(set([x[0] for x in culled_vocab]), set([x[0] for x in culled_vocab2]))
+
+    for word in intersection_set:
         if len(target_words) != 0 and word not in target_words:
             continue
 
         if (word.startswith("!") or word.startswith("@") or word.startswith("http") or (
                 word[-1] in string.punctuation) or (word[0] in string.punctuation)):
             continue
-        if model1.vocab[word].count > f and model2.vocab[word].count > f:
-            dist = measure_semantic_shift_by_neighborhood(model1, model2, word, k, verbose=False)
-            dists.append((word, dist))
+        #if model1.vocab[word].count > f and model2.vocab[word].count > f:
+        dist = measure_semantic_shift_by_neighborhood(model1, model2, word, k, verbose=False)
+        dists.append((word, dist))
     # sys.stdout.write('\nGOT DISTS')
 
     dists.sort(key=lambda x: x[1], reverse=True)
@@ -248,7 +279,7 @@ if __name__ == "__main__":
     parser.add_argument("--model2_filepath", type=str,
                         default="/models/continuous/3/2017-04_2017-06/vec_200_w10_mc500_iter15_sg0/saved_model.gensim",
                         help="path to second embedding model")
-    parser.add_argument("-f", "--frequency_threshold", type=int, default=0,
+    parser.add_argument("-f", "--frequency_threshold", type=float, default=0.1,
                         help="Limit the words we rank to only those which occured at least f times in both months")
     parser.add_argument("-k", "--k_neighbors", type=int, default=25,
                         help="Number of neighbors to consider if using neighborhood shift measure")
