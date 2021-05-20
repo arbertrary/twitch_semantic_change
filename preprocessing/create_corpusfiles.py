@@ -68,19 +68,19 @@ def emote_sentence(emote_ranges):
 
 
 def ungrouped_corpusfile(in_filepath):
-    df = pd.read_csv(in_filepath, sep=",")
-    filename = os.path.basename(in_filepath)
+    df = pd.read_csv(in_filepath, sep=",", error_bad_lines=False)
+    filename = os.path.basename(in_filepath).replace(".csv",".txt")
 
     df = df["msg"]
 
-    df.to_csv(os.path.join(out_path, filename), index=None, header=None)
+    df.to_csv(os.path.join(out_path, "ungrouped_"+filename), index=None, header=None)
 
 
 def corpusfile(in_filepath):
-    df = pd.read_csv(in_filepath, sep=",")
+    df = pd.read_csv(in_filepath, sep=",", error_bad_lines=False)
     df.style.hide_index()
 
-    filename = os.path.basename(in_filepath)
+    filename = os.path.basename(in_filepath).replace(".csv", ".txt")
 
     grouped_df = df.groupby("chid")
     with open(os.path.join(out_path, "grouped_" + filename), "w") as outfile:

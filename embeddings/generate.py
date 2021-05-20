@@ -141,7 +141,7 @@ if __name__ == '__main__':
     print(input_dir)
     print(model_dir)
     if not os.path.exists(model_dir):
-        os.mkdir(model_dir)
+        os.makedirs(model_dir, exist_ok=True)
 
     # If only one month is given train embeddings for single month
     # This is done in this way to let multiple Kubernetes Jobs train embeddings for one month each

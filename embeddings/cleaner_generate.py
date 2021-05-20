@@ -4,7 +4,10 @@ import os
 import string
 import gensim
 from gensim.test.utils import datapath
-from util.loader import ChatYielder
+
+import sys
+sys.path.append("/home/stud/bernstetter/ma/mainrepo/util")
+from loader import ChatYielder
 
 assert gensim.models.word2vec.FAST_VERSION > -1
 from time import time
