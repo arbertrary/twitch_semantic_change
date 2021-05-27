@@ -7,5 +7,6 @@ chatlogs/
 eventlogs/
 models/
 testdata/
+data/emotes/emote_imgs/
 semantic_change_detection/synth/changepoint/
 *.json

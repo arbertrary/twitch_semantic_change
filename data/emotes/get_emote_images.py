@@ -2,6 +2,7 @@ import os.path
 import requests
 import csv
 import time
+import random
 
 from tqdm import tqdm
 
@@ -23,13 +24,17 @@ def download(csv_path, emoteset):
                 new_url = url.replace("1x", "3x")
                 path = os.path.join("images/bttv", filename)
 
-            # print(filename)
+            print(filename)
+            try:
+                img = requests.get(url)
+            except requests.exceptions.RequestException as e:
+                    raise SystemExit(e)
 
-            # img = requests.get(url)
-            # with open(path, "wb") as file:
-            #     file.write(img.content)
-            #
-            time.sleep(3)
+            with open(path, "wb") as file:
+                file.write(img.content)
+            
+            pause = random.randint(2,6)
+            time.sleep(pause)
 
 
 if __name__ == '__main__':
