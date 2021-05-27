@@ -1,3 +1,4 @@
+import requests
 from requests_html import HTMLSession
 import re
 import csv
@@ -24,7 +25,7 @@ def get_bttv_global():
             emote_name = emote.find("div", first=True).text
             href = emote.attrs.get("href")
             emote_id = re.match(r".*emotes/(.*)", href).group(1)
-            emote_src = "https://cdn.betterttv.net/emote/{}/1x".format(emote_id)
+            emote_src = "https://cdn.betterttv.net/emote/{}/3x".format(emote_id)
 
             csv_writer.writerow([emote_name, emote_id, emote_src])
 
@@ -43,7 +44,7 @@ def get_ffz_new():
             a = emote.find(".emote-name", first=True).find("a", first=True)
             emote_name = a.text
             emote_id = re.match(r".*/(\d*)-(.*)", a.attrs.get("href")).group(1)
-            emote_source = "https://cdn.frankerfacez.com/emoticon/{}/1".format(emote_id)
+            emote_source = "https://cdn.frankerfacez.com/emoticon/{}/4".format(emote_id)
 
             emote_dict = {"id": emote_id, "src": emote_source}
 
@@ -71,6 +72,7 @@ def get_twitch_global():
         for emote in emotes:
             img = emote.find("img", first=True).attrs
             emote_source = img["src"]
+            emote_source = emote_source.replace("1.0", "3.0")
             emote_name = img["data-regex"]
             emote_id = img["data-image-id"]
 
