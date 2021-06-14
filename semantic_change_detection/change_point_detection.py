@@ -510,10 +510,10 @@ if __name__ == "__main__":
 
         os.makedirs(options.outfiles_dir, exist_ok=True)
         with open(distances_filepath, 'w') as outfile:
-            json.dump(dict_of_dist_dicts, outfile)
+            json.dump(dict_of_dist_dicts, outfile, indent=2)
 
         with open(zscores_filepath, 'w') as outfile:
-            json.dump(dict_of_z_score_dicts, outfile)
+            json.dump(dict_of_z_score_dicts, outfile, indent=2)
 
     print("GOT DICTS OF DIST AND Z-SCORE DICTS at {}\n".format(datetime.datetime.now()))
 

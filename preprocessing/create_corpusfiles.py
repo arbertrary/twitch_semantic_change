@@ -8,6 +8,15 @@ import numpy as np
 import re
 
 
+def filter_non_emote_messages(in_filepath):
+    df = pd.read_csv(in_filepath, sep=",")
+    df.dropna(subset=["emotes", "extemotes"], how="all", inplace=True)
+    
+    filename = "filtered_" + os.path.basename(in_filepath)
+
+    out_filepath = os.path.join(out_path, filename)
+    df.to_csv(out_filepath, index=False)
+
 def emote_corpusfile(in_filepath):
     df = pd.read_csv(in_filepath, sep=",")
     filename = os.path.basename(in_filepath)
@@ -118,5 +127,7 @@ if __name__ == '__main__':
         pool.map(corpusfile, filelist)
     elif options.mode == "u":
         pool.map(ungrouped_corpusfile, filelist)
+    elif options.mode == "f":
+        pool.map(filter_non_emote_messages, filelist)
     else:
         pool.map(emote_corpusfile, filelist)
