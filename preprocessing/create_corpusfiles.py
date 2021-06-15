@@ -11,11 +11,25 @@ import re
 def filter_non_emote_messages(in_filepath):
     df = pd.read_csv(in_filepath, sep=",")
     df.dropna(subset=["emotes", "extemotes"], how="all", inplace=True)
-    
+
     filename = "filtered_" + os.path.basename(in_filepath)
 
     out_filepath = os.path.join(out_path, filename)
     df.to_csv(out_filepath, index=False)
+
+
+def filter_non_emote_messages_to_tsv(in_filepath):
+    df = pd.read_csv(in_filepath, sep=",")
+    df.dropna(subset=["emotes", "extemotes"], how="all", inplace=True)
+
+    filename = "filtered_" + os.path.basename(in_filepath).replace(".csv", ".tsv")
+    df["emotenames"] = df.apply(
+        lambda row: get_emotes_in_msg_for_df(row["msg"],
+                                             str(row["emotes"]) + "/" + str(row["extemotes"])), axis=1)
+    out_filepath = os.path.join(out_path, filename)
+
+    df[["msg", "emotenames"]].to_csv(out_filepath, index=False, sep="\t")
+
 
 def emote_corpusfile(in_filepath):
     df = pd.read_csv(in_filepath, sep=",")
@@ -38,7 +52,7 @@ def emote_corpusfile(in_filepath):
                 emotes = i["tempemotes"].values.tolist()
                 messages = i["msg"].values.tolist()
                 zipped = zip(messages, emotes)
-                emote_messages = [emote_sentence2(str(msg), str(em)) for (msg, em) in zipped]
+                emote_messages = [get_emotes_in_msg_for_df(str(msg), str(em)) for (msg, em) in zipped]
 
                 # initial try: gets the emote ids
                 # emote_messages = [emote_sentence(row) for row in i["tempemotes"]]
@@ -46,7 +60,7 @@ def emote_corpusfile(in_filepath):
                 outfile.write(sent)
 
 
-def emote_sentence2(message: str, emote_ranges):
+def get_emotes_in_msg_for_df(message: str, emote_ranges):
     emotes = emote_ranges.split("/")
 
     emote_indices = [x.split(":")[1].strip() for x in emotes if x != "nan"]
@@ -67,22 +81,13 @@ def emote_sentence2(message: str, emote_ranges):
     return " ".join(emotenames)
 
 
-def emote_sentence(emote_ranges):
-    twemotes = emote_ranges
-
-    emotes = twemotes.split("/")
-    emotenames = [x.split(":")[0].strip() for x in emotes if x != "nan"]
-
-    return " ".join(emotenames)
-
-
 def ungrouped_corpusfile(in_filepath):
     df = pd.read_csv(in_filepath, sep=",", error_bad_lines=False)
-    filename = os.path.basename(in_filepath).replace(".csv",".txt")
+    filename = os.path.basename(in_filepath).replace(".csv", ".txt")
 
     df = df["msg"]
 
-    df.to_csv(os.path.join(out_path, "ungrouped_"+filename), index=None, header=None)
+    df.to_csv(os.path.join(out_path, "ungrouped_" + filename), index=None, header=None)
 
 
 def corpusfile(in_filepath):
@@ -128,6 +133,6 @@ if __name__ == '__main__':
     elif options.mode == "u":
         pool.map(ungrouped_corpusfile, filelist)
     elif options.mode == "f":
-        pool.map(filter_non_emote_messages, filelist)
+        pool.map(filter_non_emote_messages_to_tsv, filelist)
     else:
         pool.map(emote_corpusfile, filelist)
