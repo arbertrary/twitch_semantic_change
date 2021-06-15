@@ -56,7 +56,7 @@ def external_emote_ranges(msg_text: str, external_emotes_dict: dict[str, str]) -
     range_dict = {}
     for word in msg:
         if external_emotes_dict.get(word):
-            emote_range = str(index) + "-" + str(index + len(word))
+            emote_range = str(index) + "-" + str(index + len(word)-1)
             emote_id = external_emotes_dict.get(word)
             if range_dict.get(emote_id):
                 range_dict[emote_id] += "," + emote_range
@@ -69,72 +69,91 @@ def external_emote_ranges(msg_text: str, external_emotes_dict: dict[str, str]) -
     return emote_ranges
 
 
-def clean_old_chatlogs(infilepath: str, outfiles_rootdir, emotes_dict: dict[str, str], channels_dict, users_dict):
+def clean_old_chatlogs(infilepath: str):
     filename = re.match(r".*_(\d{12}.txt).*", infilepath).group(1)
 
-    outfilepath = os.path.join(outfiles_rootdir, filename)
-
-    if infilepath.endswith(".gz"):
-        infile = gzip.open(infilepath, "rt")
-    elif infilepath.endswith(".zip"):
-        infile = zipfile.ZipFile(infilepath).open(os.path.basename(infilepath).replace(".zip", ""), "r")
-    else:
-        infile = open(infilepath, "rt")
-
-    outstrings = []
-    for line in infile.readlines():
-        if infilepath.endswith(".zip"):
-            msg_data = json.loads(line.decode("utf-8"))
+    outfilepath = os.path.join(out_root, filename)
+    try:
+        if infilepath.endswith(".gz"):
+            infile = gzip.open(infilepath, "rt")
+        elif infilepath.endswith(".zip"):
+            infile = zipfile.ZipFile(infilepath).open(os.path.basename(infilepath).replace(".zip", ""), "r")
         else:
-            msg_data = json.loads(line)
-        lng = msg_data.get("stream").get("language")
-        if lng != "en":
-            continue
+            infile = open(infilepath, "rt")
 
-        viewercount = int(msg_data.get("stream").get("viewer_count"))
+        outstrings = []
+        for line in infile.readlines():
+            if infilepath.endswith(".zip"):
+                msg_data = json.loads(line.decode("utf-8"))
+            else:
+                msg_data = json.loads(line)
+            lng = msg_data.get("stream").get("language")
+            if lng != "en":
+                continue
 
-        timestamp = msg_data.get("timestamp")
-        roomstate = msg_data.get("roomstate")
-        emote_only = roomstate.get("emote-only")
-        r9k = roomstate.get("r9k")
-        chid = roomstate.get("room-id")
-        channelname = roomstate.get("channel").removeprefix("#")
+            viewercount = int(msg_data.get("stream").get("viewer_count"))
 
-        if chid in channels_dict:
-            # channels_dict.get(chid).get("vcnt").append(viewercount)
-            channels_dict[chid]["vcnt_summed"] += viewercount
-            channels_dict[chid]["n_msgs"] += 1
-        else:
-            channel = {"ch": channelname, "vcnt_summed": viewercount, "n_msgs": 1}
-            channels_dict[chid] = channel
+            timestamp = msg_data.get("timestamp")
+            roomstate = msg_data.get("roomstate")
+            emote_only = roomstate.get("emote-only")
+            r9k = roomstate.get("r9k")
+            chid = roomstate.get("room-id")
+            channelname = roomstate.get("channel").removeprefix("#")
 
-        userstate = msg_data.get("userstate")
-        usid = userstate.get("user-id")
-        # username = userstate.get("username")
-        uemo = userstate.get("emotes-raw")
-        sub = userstate.get("subscriber")
-        mod = userstate.get("mod")
+            # if chid in channels_dict:
+            #     # channels_dict.get(chid).get("vcnt").append(viewercount)
+            #     channels_dict[chid]["vcnt_summed"] += viewercount
+            #     channels_dict[chid]["n_msgs"] += 1
+            # else:
+            #     channel = {"ch": channelname, "vcnt_summed": viewercount, "n_msgs": 1}
+            #     channels_dict[chid] = channel
 
-        # users_dict[usid] = username
+            userstate = msg_data.get("userstate")
+            usid = userstate.get("user-id")
+            # username = userstate.get("username")
+            uemo = userstate.get("emotes-raw")
+            sub = userstate.get("subscriber")
+            mod = userstate.get("mod")
 
-        msg = msg_data.get("message")
+            # users_dict[usid] = username
 
-        game = msg_data.get("game").get("name")
+            msg = msg_data.get("message")
 
-        # TODO: clean message string here
-        # msg_text = clean_message(msg_text)
-        ext_emotes = external_emote_ranges(msg, emotes_dict)
-        outList = [timestamp, chid, msg, uemo, ext_emotes, game, usid, sub, mod, emote_only, r9k]
-        outstrings.append(outList)
+            game = msg_data.get("game").get("name")
 
-    infile.close()
+            # TODO: clean message string here
+            # msg_text = clean_message(msg_text)
+            ext_emotes = external_emote_ranges(msg, emotes_dict)
+            outList = [timestamp, chid, msg, uemo, ext_emotes, game, usid, sub, mod, emote_only, r9k]
+            outstrings.append(outList)
 
-    with open(outfilepath, "w") as outfile:
-        csv_writer = csv.writer(outfile)
-        csv_writer.writerow(["ts", "chid", "msg", "emotes", "extemotes", "game", "usid", "sub", "mod", "emonly", "r9k"])
-        outstrings.sort(key=operator.itemgetter(1, 0))
-        for msg in outstrings:
-            csv_writer.writerow(msg)
+        infile.close()
+
+        with open(outfilepath, "w", encoding="utf-8") as outfile:
+            csv_writer = csv.writer(outfile)
+            csv_writer.writerow(
+                ["ts", "chid", "msg", "emotes", "extemotes", "game", "usid", "sub", "mod", "emonly", "r9k"])
+            outstrings.sort(key=operator.itemgetter(1, 0))
+            for msg in outstrings:
+                csv_writer.writerow(msg)
+
+    except json.decoder.JSONDecodeError as e:
+        print(filename)
+        logging.error("# JSON ERROR AT: " + filename)
+        logging.error(e)
+    except UnicodeDecodeError as e:
+        print(filename)
+        logging.error("# UNICODEDECODE ERROR AT: " + filename)
+        logging.error(e)
+    except zipfile.BadZipFile as e:
+        print(filename)
+        logging.error("# zipfile.BadZipFile ERROR AT: " + filename)
+        logging.error(e)
+    except KeyError as k:
+        print(filename)
+        logging.error("# KeyError No item named ERROR AT: " + filename)
+        logging.error(k)
+    logging.info(filename)
 
     logging.info(file)
 
@@ -142,14 +161,14 @@ def clean_old_chatlogs(infilepath: str, outfiles_rootdir, emotes_dict: dict[str,
 def clean_djinn4_chatlogs(infilepath: str):
     filename = re.match(r".*_(\d{12}.txt)", os.path.basename(infilepath)).group(1)
 
-    outfilepath = os.path.join(out_root, "H2_"+filename)
+    outfilepath = os.path.join(out_root, "H2_" + filename)
     try:
         with open(infilepath, "r") as infile:
             outstrings = []
             for line in infile.readlines():
                 msg_data = json.loads(line)
-                #lng = msg_data.get("lng")
-                #if lng != "en":
+                # lng = msg_data.get("lng")
+                # if lng != "en":
                 #    continue
 
                 timestamp = msg_data.get("ts")
@@ -255,10 +274,12 @@ if __name__ == '__main__':
         os.mkdir(out_root)
 
     if options.multi == 1:
-        pool.map(clean_djinn4_chatlogs, filelist)
+        # pool.map(clean_djinn4_chatlogs, filelist)
+        pool.map(clean_old_chatlogs, filelist)
     else:
         for file in filelist:
-            clean_djinn4_chatlogs(file)
+            clean_old_chatlogs(file)
+            # clean_djinn4_chatlogs(file)
 
     # for file in os.listdir(in_root):
     #     chatlog_path = os.path.join(in_root, file)
@@ -311,4 +332,3 @@ if __name__ == '__main__':
     #     json.dump(ch_dict, channels)
 
     print("--- %s seconds ---" % (time.time() - start_time))
-
