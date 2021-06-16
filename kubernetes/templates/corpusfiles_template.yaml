@@ -1,14 +1,14 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: corpusfile-{{ month }}
+  name: corpusfile-{{ month }}-lol-ungrouped
   namespace: studbernstetter
   annotations:
     description: "create emote corpus files"
 spec:
   template:
     spec:
-      priorityClassName: research-med
+      priorityClassName: research-low
       imagePullSecrets:
         - name: gitlab-registry-bernstetter
       containers:
@@ -18,16 +18,16 @@ spec:
           resources:
             limits:
               cpu: "12"
-              memory: "16Gi"
+              memory: "32Gi"
             requests:
-              cpu: "12"
-              memory: "16Gi"
+              cpu: "1"
+              memory: "4Gi"
           command:
             - "python3"
             - "/home/stud/bernstetter/ma/mainrepo/preprocessing/create_corpusfiles.py"
-            - "--infiles_rootdir=/home/stud/bernstetter/datasets/twitch/{{ month }}/clean_en_sorted/"
-            - "--outdir_path=/home/stud/bernstetter/datasets/twitch/{{ month }}/30s_grouped_txt/"
-            - "--mode=g"
+            - "--infiles_rootdir=/home/stud/bernstetter/datasets/twitch/{{ month }}/games/lol/"
+            - "--outdir_path=/home/stud/bernstetter/datasets/twitch/{{ month }}/games/lol/"
+            - "--mode=u"
           volumeMounts:
             - mountPath: /home/stud/bernstetter
               name: home

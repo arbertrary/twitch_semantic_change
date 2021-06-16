@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: embedding-dta-18-old
+  name: embedding-dta-18-sg0
   namespace: studbernstetter
   annotations:
     description: "creating embeddings"
@@ -20,20 +20,20 @@ spec:
               cpu: "6"
               memory: "8Gi"
             requests:
-              cpu: "6"
-              memory: "8Gi"
+              cpu: "4"
+              memory: "4Gi"
           command:
             - "python3"
             - "/home/stud/bernstetter/ma/mainrepo/embeddings/generate.py"
             - "--input_dir=/home/stud/bernstetter/datasets/dta/dta18.txt"
             - "--model_dir=/home/stud/bernstetter/models/dta/woc/18/"
             - "--worker_count=4"
-            - "--skipgram=1"
+            - "--skipgram=0"
             - "--word2vec=1"
-            - "--epoch_count=5"
-            - "--word_min_count=20"
-            - "--vector_size=300"
-            - "--window_size=4"
+            - "--epoch_count=10"
+            - "--word_min_count=25"
+            - "--vector_size=128"
+            - "--window_size=5"
             # Default values by room2glo
             # --vector_size 200 --window_size 10 --min_count 500 --no_of_iter 15
           volumeMounts:

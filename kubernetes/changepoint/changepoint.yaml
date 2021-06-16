@@ -1,14 +1,14 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: cp-cos-sampled-sg0-fst-fb
+  name: twitch-cp-sg0-last
   namespace: studbernstetter
   annotations:
     description: "detect changepoint"
 spec:
   template:
     spec:
-      priorityClassName: research-med
+      priorityClassName: research-low
       imagePullSecrets:
         - name: gitlab-registry-bernstetter
       containers:
@@ -20,24 +20,24 @@ spec:
               cpu: "12"
               memory: "32Gi"
             requests:
-              cpu: "12"
-              memory: "32Gi"
+              cpu: "4"
+              memory: "8Gi"
           command:
             - "python3"
-            - "/home/stud/bernstetter/ma/initial/semantic_change_detection/change_point_detection.py"
-            - "--models_rootdir=/home/stud/bernstetter/models/twitch_sampled/timeseries/"
-            - "--outfiles_dir=/home/stud/bernstetter/models/twitch_sampled/results/changepoint/sg0Targets/"
-            - "--targets=/home/stud/bernstetter/ma/initial/semantic_change_detection/targets/targets.csv"
+            - "/home/stud/bernstetter/ma/mainrepo/semantic_change_detection/change_point_detection.py"
+            - "--models_rootdir=/home/stud/bernstetter/models/twitch/ungrouped/"
+            - "--outfiles_dir=/home/stud/bernstetter/models/twitch/ungrouped_results/changepoint/sg0_targets_meanshifttest/"
+            - "--targets=/home/stud/bernstetter/ma/mainrepo/data/targets/twitch_targets.csv"
             - "--distance_measure=cosine"
-            - "--k_neighbors=5"
-            - "--min_count=20"
-            - "--skipgram=0"
+            - "--k_neighbors=25"
+            - "--min_count=100"
+            - "--skipgram=1"
             - "--no_of_iter=10"
             - "--word2vec=1"
             - "--z_scores"
-            - "--align_to=fst"
-            - "--compare_to=fst"
-            - "--vocab_threshold=50"
+            - "--align_to=last"
+            - "--compare_to=last"
+            - "--vocab_threshold=75"
             - "--clean=0"
           volumeMounts:
             - mountPath: /home/stud/bernstetter

@@ -8,25 +8,25 @@ metadata:
 spec:
   template:
     spec:
-      priorityClassName: research-med
+      priorityClassName: research-low
       imagePullSecrets:
         - name: gitlab-registry-bernstetter
       containers:
         - name: pythonbase
-          image: gitlab2.informatik.uni-wuerzburg.de:4567/s319059/containers/pythonbase
+          image: lsx-harbor.informatik.uni-wuerzburg.de/containers/pythonbase:latest
           imagePullPolicy: "Always"
           resources:
             limits:
               cpu: "12"
               memory: "32Gi"
             requests:
-              cpu: "12"
-              memory: "32Gi"
+              cpu: "2"
+              memory: "8Gi"
           command:
             - "python3"
-            - "/home/stud/bernstetter/ma/initial/synthetic_data_generation/get_freqs_and_wordnet_stats.py"
-            - "--input_dir=/home/stud/bernstetter/datasets/synthetic_twitch2/ungrouped/concat/"
-            - "--output_dir=/home/stud/bernstetter/datasets/synthetic_twitch2/"
+            - "/home/stud/bernstetter/ma/mainrepo/synthetic_data_generation/get_freqs_and_wordnet_stats.py"
+            - "--input_dir=/home/stud/bernstetter/datasets/twitch_multimodal/201911_filtered_2cols/"
+            - "--output_dir=/home/stud/bernstetter/datasets/twitch_multimodal/"
           volumeMounts:
             - mountPath: /home/stud/bernstetter
               name: home

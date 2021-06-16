@@ -1,0 +1,54 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: chatlogs-prep-201905
+  namespace: studbernstetter
+  annotations:
+    description: "Preprocessing twitch chatlogs"
+spec:
+  template:
+    spec:
+      priorityClassName: research-low
+      containers:
+        - name: python3
+          image: python:3
+          imagePullPolicy: "IfNotPresent"
+          resources:
+            limits:
+              cpu: "12"
+              memory: "16Gi"
+            requests:
+              cpu: "4"
+              memory: "4Gi"
+          # python3 preprocessing.py -f "/home/stud/bernstetter/ma/initial/emotes/ffz_emotes.csv" -b "/home/stud/bernstetter/ma/initial/emotes/bttv_global_emotes.csv" -i "/home/stud/bernstetter/datasets/twitch/201905/raw"
+          command:
+            - "python3"
+            - "/home/stud/bernstetter/ma/mainrepo/preprocessing/preprocessing.py"
+            - "--bttv=/home/stud/bernstetter/ma/mainrepo/data/emotes/2021/bttv_global_emotes.csv"
+            - "--ffz=/home/stud/bernstetter/ma/mainrepo/data/emotes/2021/ffz_emotes.csv"
+            - "--infiles_rootdir=/home/stud/bernstetter/datasets/twitch/201905/raw"
+            - "--outfiles_dir=/home/stud/bernstetter/datasets/twitch/201905/clean"
+            - "--multi=1"
+          volumeMounts:
+            - mountPath: /home/stud/bernstetter
+              name: home
+            - mountPath: /media/kobs/twitch_archiv
+              name: media
+      restartPolicy: "Never"
+      volumes:
+        - name: media
+          cephfs:
+            monitors:
+            - 132.187.14.16,132.187.14.17,132.187.14.19,132.187.14.20
+            user: studbernstetter
+            path: "/backups/twitch/archiv/djinn3_zips_until_april_2020"
+            secretRef:
+              name: ceph-secret-studbernstetter
+        - name: home
+          cephfs:
+            monitors:
+              - 132.187.14.16,132.187.14.17,132.187.14.19,132.187.14.20
+            user: studbernstetter
+            path: "/home/stud/bernstetter"
+            secretRef:
+              name: ceph-secret-studbernstetter

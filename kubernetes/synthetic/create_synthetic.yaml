@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: create-synth
+  name: create-synth-test
   namespace: studbernstetter
   annotations:
     description: ""
@@ -17,22 +17,22 @@ spec:
           imagePullPolicy: "Always"
           resources:
             limits:
-              cpu: "4"
+              cpu: "10"
               memory: "20Gi"
             requests:
               cpu: "4"
-              memory: "20Gi"
+              memory: "8Gi"
           command:
             - "python3"
             - "/home/stud/bernstetter/ma/mainrepo/synthetic_data_generation/create_synthetic_dataset.py"
-            - "--input_filepath=/home/stud/bernstetter/datasets/synthetic_twitch_3y/ungrouped/concat_10p_cutoff_201911.txt"
-            - "--outfiles_rootdir=/home/stud/bernstetter/datasets/synthetic_twitch_3y/ungrouped/"
-            - "--context_word_dict_filepath=/home/stud/bernstetter/datasets/synthetic_twitch_3y/context_word_dict.json"
-            - "--pseudoword_dict_filepath=/home/stud/bernstetter/datasets/synthetic_twitch_3y/pseudoword_dict.json"
+            - "--input_filepath=/home/stud/bernstetter/datasets/twitch_multimodal/201911_em_concat.tsv"
+            - "--outfiles_rootdir=/home/stud/bernstetter/datasets/twitch_multimodal/synth_test/"
+            - "--context_word_dict_filepath=/home/stud/bernstetter/datasets/twitch_multimodal/synthetic/context_word_dict.json"
+            - "--pseudoword_dict_filepath=/home/stud/bernstetter/datasets/twitch_multimodal/synthetic/pseudoword_dict.json"
             - "--start_year=2019"
-            - "--start_month=1"
-            - "--end_year=2021"
-            - "--end_month=12"
+            - "--start_month=5"
+            - "--end_year=2020"
+            - "--end_month=4"
           volumeMounts:
             - mountPath: /home/stud/bernstetter
               name: home

@@ -10,7 +10,7 @@ spec:
     spec:
       priorityClassName: research-low
       imagePullSecrets:
-        - name: gitlab-registry
+        - name: gitlab-registry-bernstetter
       containers:
         - name: pythonbase
           image: gitlab2.informatik.uni-wuerzburg.de:4567/s319059/containers/pythonbase

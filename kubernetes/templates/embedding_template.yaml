@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: embedding-{{ month }}-sg0-30s
+  name: embedding-{{ month }}-dota-sg1
   namespace: studbernstetter
   annotations:
     description: "creating embeddings"
@@ -18,15 +18,15 @@ spec:
           resources:
             limits:
               cpu: "6"
-              memory: "32Gi"
+              memory: "16Gi"
             requests:
-              cpu: "3"
+              cpu: "4"
               memory: "8Gi"
           command:
             - "python3"
             - "/home/stud/bernstetter/ma/mainrepo/embeddings/generate.py"
-            - "--input_dir=/home/stud/bernstetter/datasets/twitch/{{ month }}/30s_grouped_txt/"
-            - "--model_dir=/home/stud/bernstetter/models/twitch/30s_grouped/{{ month }}"
+            - "--input_dir=/home/stud/bernstetter/datasets/twitch/{{ month }}/games/{{ month }}_30s_Dota2.txt"
+            - "--model_dir=/home/stud/bernstetter/models/twitch/timeseries_games/dota/{{ month }}"
             - "--worker_count=5"
             - "--skipgram=0"
             - "--word2vec=1"

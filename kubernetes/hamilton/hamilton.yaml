@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: dta-hamilton
+  name: dotalol-sg0
   namespace: studbernstetter
   annotations:
     description: "detect change"
@@ -18,19 +18,20 @@ spec:
           resources:
             limits:
               cpu: "8"
-              memory: "4Gi"
+              memory: "8Gi"
             requests:
-              cpu: "8"
+              cpu: "2"
               memory: "4Gi"
           command:
             - "python3"
-            - "/home/stud/bernstetter/ma/initial/semantic_change_detection/hamilton_semantic_change_measures.py"
-            - "--model1_filepath=/home/stud/bernstetter/models/dta/woc/18/vec_300_w4_mc20_iter5_sg1_lc0_clean0_w2v1/saved_model.gensim"
-            - "--model2_filepath=/home/stud/bernstetter/models/dta/woc/19/vec_300_w4_mc20_iter5_sg1_lc0_clean0_w2v1/saved_model.gensim"
-            - "--outfiles_dir=/home/stud/bernstetter/models/dta/woc_results/hamilton/vec_300_w4_mc20_iter5_sg0_lc0_clean0_w2v1/"
-            - "--t_best=200"
-            - "--k_neighbors=10"
-            - "--frequency_threshold=20"
+            - "/home/stud/bernstetter/ma/mainrepo/semantic_change_detection/hamilton_semantic_change_measures.py"
+            - "--model1_filepath=/home/stud/bernstetter/models/twitch_sampled/games/dota/vec_128_w5_mc100_iter10_sg0_lc0_clean0_w2v1/saved_model.gensim"
+            - "--model2_filepath=/home/stud/bernstetter/models/twitch_sampled/games/lol/vec_128_w5_mc100_iter10_sg0_lc0_clean0_w2v1/saved_model.gensim"
+            - "--outfiles_dir=/home/stud/bernstetter/models/twitch_sampled/games_results/dotalol_k25/sg0/"
+              #- "--targets=/home/stud/bernstetter/ma/mainrepo/data/targets/surel_targets.csv"
+            - "--t_best=50"
+            - "--k_neighbors=25"
+            - "--frequency_threshold=0.1"
             - "--cosine" 
             - "--neighborhood"
           volumeMounts:

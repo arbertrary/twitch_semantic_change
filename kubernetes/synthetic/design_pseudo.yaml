@@ -20,17 +20,17 @@ spec:
               cpu: "4"
               memory: "8Gi"
             requests:
-              cpu: "4"
+              cpu: "1"
               memory: "8Gi"
           command:
             - "python3"
             - "/home/stud/bernstetter/ma/mainrepo/synthetic_data_generation/design_pseudowords.py"
-            - "--input_filepath=/home/stud/bernstetter/datasets/synthetic_twitch_3y/vocab_stats.csv"
-            - "--outfiles_rootdir=/home/stud/bernstetter/datasets/synthetic_twitch_3y/"
+            - "--input_filepath=/home/stud/bernstetter/datasets/twitch_multimodal/vocab_stats.csv"
+            - "--outfiles_rootdir=/home/stud/bernstetter/datasets/twitch_multimodal/synthetic/"
             - "--start_year=2019"
-            - "--start_month=1"
-            - "--end_year=2021"
-            - "--end_month=12"
+            - "--start_month=5"
+            - "--end_year=2020"
+            - "--end_month=4"
           volumeMounts:
             - mountPath: /home/stud/bernstetter
               name: home
