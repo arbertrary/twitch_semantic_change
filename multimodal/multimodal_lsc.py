@@ -22,6 +22,8 @@ def build_vocabulary(in_path: str, out_path: str, min_count: int):
 
                 tuplelist = []
                 for word in message.split():
+                    if word in emotenames:
+                        continue
                     tpl = tuple([word] + emotenames)
                     tuplelist.append([tpl])
                     # tuplelist.append([(word, emote)])
@@ -29,14 +31,9 @@ def build_vocabulary(in_path: str, out_path: str, min_count: int):
                 # print(tuplelist)
                 counter.update(chain(*tuplelist))
 
-    print(counter.most_common(10))
-
-    for c in counter.most_common():
-        print(c)
-
-    c = {str(x): count for x, count in sorted(counter.items(), key=lambda x: x[1], reverse=True) if count >= min_count}
-    with open(out_path, "w") as outfile:
-        json.dump(OrderedDict(c), outfile, indent=2)
+        c = {str(x): count for x, count in sorted(counter.items(), key=lambda x: x[1], reverse=True) if count >= min_count}
+        with open(out_path, "w") as outfile:
+            json.dump(OrderedDict(c), outfile, indent=2)
 
 
 if __name__ == '__main__':
@@ -49,6 +46,6 @@ if __name__ == '__main__':
     indir = args.infiles_rootdir
     outdir = args.outdir_path
 
-    # build_vocabulary(indir, outdir, args.min)
+    build_vocabulary(indir, outdir, args.min)
 
-    build_vocabulary("../data/testdata/emote_filtered", "vocab.json", min_count=2)
+    #build_vocabulary("../data/testdata/emote_filtered", "vocab.json", min_count=2)

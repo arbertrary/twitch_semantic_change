@@ -155,8 +155,6 @@ def clean_old_chatlogs(infilepath: str):
         logging.error(k)
     logging.info(filename)
 
-    logging.info(file)
-
 
 def clean_djinn4_chatlogs(infilepath: str):
     filename = re.match(r".*_(\d{12}.txt)", os.path.basename(infilepath)).group(1)
@@ -245,7 +243,7 @@ if __name__ == '__main__':
     parser.add_argument("-b", "--bttv", type=str, help="path to the bttv emotes csv")
     parser.add_argument("-mp", "--multi", type=int, default=0, help="whether to use multiprocessing")
     options = parser.parse_args()
-    log_path = os.path.abspath(os.path.join(options.infiles_rootdir, os.pardir, os.pardir, "prepH2.log"))
+    log_path = os.path.abspath(os.path.join(options.infiles_rootdir, os.pardir, "prep_fixed.log"))
     print(log_path)
     logging.basicConfig(filename=log_path, encoding="utf-8", level=logging.DEBUG, format="%(message)s")
     logging.info("# Started at {}\n".format(datetime.datetime.now()))
