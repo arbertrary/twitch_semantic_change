@@ -438,9 +438,9 @@ if __name__ == "__main__":
                 break
 
     with open(outfiles_rootdir + 'context_word_dict.json', 'w') as outfile:
-        json.dump(context_word_dict, outfile, cls=NumpyEncoder)
+        json.dump(context_word_dict, outfile, cls=NumpyEncoder, indent=2)
     write_logfile(outfiles_rootdir + 'context_word_dict.json', options, start_time)
 
     with open(outfiles_rootdir + 'pseudoword_dict.json', 'w') as outfile:
-        json.dump(pseudoword_dict, outfile, cls=NumpyEncoder)
+        json.dump(pseudoword_dict, outfile, cls=NumpyEncoder, indent=2)
     write_logfile(outfiles_rootdir + 'pseudoword_dict.json', options, start_time)

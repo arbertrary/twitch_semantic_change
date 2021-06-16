@@ -92,13 +92,13 @@ def create_synthetic(year_month_index, subsampling, subsample_percent: float):
 
     # with gzip.open(os.path.join(outfiles_rootdir, year_month[:4], year_month), "wt") as outfile:
 
-    df = pd.read_csv(input_filepath,names=["msg"])
+    df = pd.read_csv(input_filepath,names=["msg","emotenames"],sep="\t")
     if subsampling:
         df = df.sample(frac=subsample_percent)
 
     df["msg"] = df["msg"].apply(lambda x: synthesize_message(x, year_month_index))
 
-    df.to_csv(os.path.join(outfiles_rootdir, year_month[:4], year_month), index=False)
+    df.to_csv(os.path.join(outfiles_rootdir, year_month[:4], year_month),sep="\t", index=False)
 
 
 if __name__ == '__main__':

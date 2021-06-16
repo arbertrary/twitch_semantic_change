@@ -37,6 +37,17 @@ def read_chatlog_csv(filepath: str, word_freq: Counter, emote_freq: Counter):
             word_freq.update(msg)
 
 
+def read_multimodal_csv(filepath: str, word_freq: Counter, emote_freq: Counter):
+    with open(filepath, "r") as infile:
+        reader = csv.DictReader(infile, delimiter="\t")
+
+        for row in reader:
+            msg = row.get("msg").split()
+            emotenames = row.get("emotenames").split()
+            emote_freq.update(emotenames)
+            word_freq.update(msg)
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("-i", "--input_dir", type=str,
@@ -64,17 +75,18 @@ if __name__ == '__main__':
                 continue
 
         file_path = os.path.join(input_dir, file)
-        read_chatlog_corpusfile(file_path, word_counter)
+        # read_chatlog_corpusfile(file_path, word_counter)
+        # read_chatlog_csv(file_path, word_counter, emote_counter)
+        read_multimodal_csv(file_path, word_counter, emote_counter)
         logging.info(file)
-    #   read_chatlog_csv(file_path, word_counter, emote_counter)
 
-    # emote_stats_path = os.path.join(out_dir, "emote_stats.csv")
-    # with open(emote_stats_path, "w") as outfile:
-    #    writer = csv.writer(outfile, delimiter=",")
-    #    writer.writerow(["emote", "freq"])
-    #    for item in emote_counter.most_common():
-    #        (emote, freq) = item
-    #        writer.writerow([emote, freq])
+    emote_stats_path = os.path.join(out_dir, "emote_stats.csv")
+    with open(emote_stats_path, "w") as outfile:
+        writer = csv.writer(outfile, delimiter=",")
+        writer.writerow(["emote", "freq"])
+        for item in emote_counter.most_common():
+            (emote, freq) = item
+            writer.writerow([emote, freq])
 
     vocab_stats_path = os.path.join(out_dir, "vocab_stats.csv")
     with open(vocab_stats_path, "w") as outfile:
@@ -138,8 +150,6 @@ if __name__ == '__main__':
                     print(lhyponyms)
                     exit()
 
-
-
             n_senses = len(senses)
             n_hypernyms = len(set(hypernyms))
             n_hyponyms = len(set(hyponyms))
@@ -149,3 +159,4 @@ if __name__ == '__main__':
             hyponyms = ' '.join(str(x) for x in set(hyponyms))
             writer.writerow([word, str(freq), str(n_senses), senses, str(n_hypernyms), hypernyms, str(n_hyponyms),
                              hyponyms])
+
