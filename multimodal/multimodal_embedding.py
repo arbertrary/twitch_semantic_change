@@ -11,15 +11,14 @@ logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=lo
 
 
 class ChatYielder(object):
-    def __init__(self, filepaths):
-        self.filepaths = filepaths
+    def __init__(self, filepath):
+        self.filepath = filepath
 
     def __iter__(self):
-        for filepath in self.filepaths:
-            with open(filepath, "r") as file:
-                reader = csv.reader(file, delimiter="\t")
-                for row in reader:
-                    yield row[0]
+        with open(self.filepath, "r") as file:
+            reader = csv.reader(file, delimiter="\t")
+            for row in reader:
+                yield row[0].split()
 
 
 def generate(vector_size, window_size, min_count, no_of_iter, workers, corpus_location, model_save_location, skipgram):
@@ -34,8 +33,7 @@ def generate(vector_size, window_size, min_count, no_of_iter, workers, corpus_lo
 
     t = time()
 
-    filepaths = [os.path.join(corpus_location, file) for file in os.listdir(corpus_location)]
-    chat_messages = ChatYielder(filepaths)
+    chat_messages = ChatYielder(corpus_location)
     model.build_vocab(sentences=chat_messages, progress_per=50000)
 
     print('Time to build vocab: {} mins'.format(round((time() - t) / 60, 2)))
