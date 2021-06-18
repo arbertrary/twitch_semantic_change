@@ -10,7 +10,7 @@ import json
 def build_vocabulary(in_path: str, out_path: str, min_count: int):
     counter = Counter()
 
-    #for file in os.listdir(in_path):
+    # for file in os.listdir(in_path):
     #    filepath = os.path.join(in_path, file)
     filepath = in_path
     with open(filepath, "r", encoding="utf-8") as csvfile:
@@ -23,8 +23,8 @@ def build_vocabulary(in_path: str, out_path: str, min_count: int):
 
             tuplelist = []
             for word in message.split():
-                if word in emotenames:
-                    continue
+                # if word in emotenames:
+                #     continue
                 tpl = tuple([word] + emotenames)
                 tuplelist.append([tpl])
                 # tuplelist.append([(word, emote)])
@@ -32,8 +32,7 @@ def build_vocabulary(in_path: str, out_path: str, min_count: int):
             # print(tuplelist)
             counter.update(chain(*tuplelist))
 
-    c = {x[0]: {"emotes": x[1:], "count": count} for x, count in 
-            sorted(counter.items(), key=lambda x: x[1], reverse=True) if count >= min_count}
+    c = {str(x): count for x, count in sorted(counter.items(), key=lambda y: y[1], reverse=True) if count >= min_count}
     with open(out_path, "w") as outfile:
         json.dump(OrderedDict(c), outfile, indent=2)
 
@@ -50,4 +49,4 @@ if __name__ == '__main__':
 
     build_vocabulary(indir, outdir, args.min)
 
-    #build_vocabulary("../data/testdata/emote_filtered", "vocab.json", min_count=2)
+    # build_vocabulary("../data/testdata/emote_filtered/filtered_201911031555.txt", "vocab.json", min_count=2)
