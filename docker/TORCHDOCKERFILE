@@ -1,0 +1,8 @@
+FROM pytorch/pytorch:1.3-cuda10.1-cudnn7-runtime
+
+COPY torch_requirements.txt ./
+
+RUN conda install --y pip
+RUN pip install --upgrade pip
+RUN pip install --no-cache-dir -r torch_requirements.txt
+RUN python3 -c "import gensim, nltk, pandas, numpy, scipy, torch" 
