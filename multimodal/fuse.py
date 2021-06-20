@@ -7,7 +7,10 @@ import json
 from ast import literal_eval as make_tuple
 import numpy as np
 
-CONFIG = {"latent_dim": 128}
+CONFIG = {
+    "latent_dim": 128,
+    "device": "cuda:0" if torch.cuda.is_available() else "cpu"  # gpu_id ('x' => multiGPU)
+}
 
 
 class AutoFusion(nn.Module):
@@ -56,23 +59,19 @@ def load_vocab(vocab_path):
     v = []
     with open(vocab_path, "r") as jsonfile:
         vocab = json.loads(jsonfile.read())
-        for w in vocab:
-            split = make_tuple(w)
-            tp = (split[0], split[1:])
-            v.append(tp)
-
-    return v
+    return vocab
 
 
 if __name__ == '__main__':
-    vocab = load_vocab("vocab.json")
-    print(vocab)
-    exit()
+    # vocab = load_vocab("vocab.json")
+    # print(vocab)
+    # exit()
 
     parser = argparse.ArgumentParser(description="generating an embedding")
     parser.add_argument("-e", "--emote_model", type=str, help="Path to the emote word embedding model")
     parser.add_argument("-w", "--word_model", type=str, help="Path to the word embedding model")
     parser.add_argument("-v", "--vocab", type=str, help="Path to the multimodal vocabulary")
+    parser.add_argument("-o", "--out_path", type=str, help="Path to the save location for the autofused tensors")
     parser.add_argument("--epochs", type=int)
 
     args = vars(parser.parse_args())
@@ -80,6 +79,7 @@ if __name__ == '__main__':
     emote_model_path = args["emote_model"]
     word_model_path = args["word_model"]
     vocab_path = args["vocab"]
+    out_path = args["out_path"]
 
     vocabulary = load_vocab(vocab_path)
     emote_model = load_gensim_model(emote_model_path)
@@ -89,14 +89,63 @@ if __name__ == '__main__':
     # torch.tensor() zu tensor machen
     # fused vektoren speichern in dictionary
     # word: tensor
-    model = AutoFusion(CONFIG, 128 * 2)
-    for w in vocab:
-        word = w[0]
-        emotes = w[1]
+    device = CONFIG["device"]
+    model = AutoFusion(CONFIG, CONFIG["latent_dim"] * 2)
+    model = model.to(device)
 
+    # TODO
+    # Wie mach ich die Epochen? Hier noch ein
+    # for i in range(epochs): drumherum?
+    # Muss dann der output nochmal wieder reingeworfen werden?
+    # Oder gibt's da eh nur einen einzigen Pass?
+    # Den output muss ich dann irgendwo speichern als
+    # {w: output["z"]}
+    # z.B. {"("typeD4_pseudoword_bin2", "LUL")" : [1,2,3,4,5,...]}
+    # Dann kann ich zwischen diesen vektoren die cos-distance berechnen
+    # und dann mal schauen was rauskommt
+
+    # TODO
+    # Wo werf ich cuda rein?
+
+    # TODO
+    # Wie speichere ich die keyedvectors dann ab?
+
+    # TODO
+    # logging
+
+    tensors = {}
+    for w in vocabulary:
+        split = make_tuple(w)
+        word = split[0]
+        print(w)
+        print(word)
+        emotes = list(split[1:])
+        print(emotes)
         word_vector = word_model[word]
+        print("word_vector", len(word_vector))
         # for the case of images possibly only this line needs to be changed?
-        emote_vector = np.mean([emote_model[emote] for emote in emotes], axis=1)
+        if len(emotes) == 1:
+            emote_vector = emote_model[emotes[0]]
+        else:
+            vectors = [emote_model[emote] for emote in emotes]
+            # print(vectors)
+            emote_vector = np.mean([emote_model[emote] for emote in emotes], axis=0)
+            # print(emote_vector)
+        print("emote_vector", len(emote_vector))
         w_input = torch.tensor(word_vector)
+        print("word_tensor", w_input.shape)
         e_input = torch.tensor(emote_vector)
+        print("emote_tensor", e_input.shape)
+
         input_concat = torch.cat([w_input, e_input])
+        print(input_concat.shape)
+
+        output = model(input_concat)
+        print(output["z"].shape)
+        print("######\n")
+        tensors[w] = output["z"]
+
+    torch.save(tensors, out_path)
+    # loaded = torch.load("multimodal/testfile")
+    # print("### LOAD")
+    # print(loaded["('OMEGALUL', 'OMEGALUL')"])
