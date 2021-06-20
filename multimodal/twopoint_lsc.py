@@ -8,9 +8,11 @@ def rank_by_cosine(model1, model2, n):
     dists = []
 
     intersection_set = set.intersection(set([x for x in model1]), set([x for x in model2]))
-    print(intersection_set)
+    #print(str(intersection_set).encode("utf-8"))
     for word in intersection_set:
-        dist = cosine(model1[word].detach().numpy(), model2[word].detach().numpy())
+        if not "pseudoword" in word:
+            continue
+        dist = cosine(model1[word].cpu().detach().numpy(), model2[word].cpu().detach().numpy())
         dists.append((word, dist))
 
     dists.sort(key=lambda x: x[1], reverse=True)
@@ -30,7 +32,7 @@ if __name__ == '__main__':
     options = parser.parse_args()
 
     model1 = torch.load(options.model1_filepath)
-    model2 = torch.load(options.model2.filepath)
+    model2 = torch.load(options.model2_filepath)
     # model1 = torch.load("../data/testdata/testmodels/fused_embeddings.pt")
     # model2 = torch.load("../data/testdata/testmodels/fused_embeddings.pt")
     n_best_by_cosine = rank_by_cosine(model1, model2, n=options.t_best)
@@ -41,7 +43,7 @@ if __name__ == '__main__':
     outfilepath = options.outfiles_dir + '/cosine.tsv'
     # outfilepath = "cosine.tsv"
 
-    with open(outfilepath, 'w') as outfile:
+    with open(outfilepath, 'w', encoding="utf-8") as outfile:
         for (i, item) in enumerate(n_best_by_cosine):
             outfile.write('{}\t{}\t{}\n'.format(i, item[0], item[1]))
 

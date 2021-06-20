@@ -59,7 +59,7 @@ def load_vocab(vocab_path):
     v = []
     with open(vocab_path, "r") as jsonfile:
         vocab = json.loads(jsonfile.read())
-    return vocab
+        return vocab
 
 
 if __name__ == '__main__':
@@ -89,9 +89,9 @@ if __name__ == '__main__':
     # torch.tensor() zu tensor machen
     # fused vektoren speichern in dictionary
     # word: tensor
-    device = CONFIG["device"]
+    #device = torch.device(CONFIG["device"])
     model = AutoFusion(CONFIG, CONFIG["latent_dim"] * 2)
-    model = model.to(device)
+    #model = model.to(device)
 
     # TODO
     # Wie mach ich die Epochen? Hier noch ein
@@ -117,19 +117,28 @@ if __name__ == '__main__':
     for w in vocabulary:
         split = make_tuple(w)
         word = split[0]
-        print(w)
-        print(word)
+        #print(w)
+        #print(word)
         emotes = list(split[1:])
-        print(emotes)
+        #print(emotes)
+        if word not in word_model:
+            continue
         word_vector = word_model[word]
         print("word_vector", len(word_vector))
         # for the case of images possibly only this line needs to be changed?
         if len(emotes) == 1:
+            if emotes[0] not in emote_model:
+                continue
             emote_vector = emote_model[emotes[0]]
         else:
-            vectors = [emote_model[emote] for emote in emotes]
+            vectors = [emote_model[emote] for emote in emotes if emote in emote_model]
             # print(vectors)
-            emote_vector = np.mean([emote_model[emote] for emote in emotes], axis=0)
+            if len(vectors) == 1:
+                emote_vector = vectors[0]
+            elif len(vectors) == 0:
+                continue
+            else:
+                emote_vector = np.mean(vectors, axis=0)
             # print(emote_vector)
         print("emote_vector", len(emote_vector))
         w_input = torch.tensor(word_vector)
@@ -138,6 +147,7 @@ if __name__ == '__main__':
         print("emote_tensor", e_input.shape)
 
         input_concat = torch.cat([w_input, e_input])
+        #input_concat = input_concat.to(CONFIG["device"])
         print(input_concat.shape)
 
         output = model(input_concat)
