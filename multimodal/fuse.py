@@ -2,6 +2,7 @@ import argparse
 
 import gensim.models
 import torch
+from torch import optim
 from torch import nn
 import json
 from ast import literal_eval as make_tuple
@@ -9,6 +10,7 @@ import numpy as np
 
 CONFIG = {
     "latent_dim": 128,
+    "lr": 1e-3,
     "device": "cuda:0" if torch.cuda.is_available() else "cpu"  # gpu_id ('x' => multiGPU)
 }
 
@@ -89,9 +91,9 @@ if __name__ == '__main__':
     # torch.tensor() zu tensor machen
     # fused vektoren speichern in dictionary
     # word: tensor
-    #device = torch.device(CONFIG["device"])
+    # device = torch.device(CONFIG["device"])
     model = AutoFusion(CONFIG, CONFIG["latent_dim"] * 2)
-    #model = model.to(device)
+    # model = model.to(device)
 
     # TODO
     # Wie mach ich die Epochen? Hier noch ein
@@ -105,27 +107,25 @@ if __name__ == '__main__':
     # und dann mal schauen was rauskommt
 
     # TODO
-    # Wo werf ich cuda rein?
-
-    # TODO
-    # Wie speichere ich die keyedvectors dann ab?
+    # Cuda/GPU nutzen? Bringt das hier überhaupt was?
 
     # TODO
     # logging
 
-    tensors = {}
+    inputs = []
     for w in vocabulary:
         split = make_tuple(w)
         word = split[0]
-        #print(w)
-        #print(word)
+        # print(w)
+        # print(word)
         emotes = list(split[1:])
-        #print(emotes)
+        # print(emotes)
         if word not in word_model:
             continue
         word_vector = word_model[word]
         print("word_vector", len(word_vector))
-        # for the case of images possibly only this line needs to be changed?
+
+        # for the case of images possibly only this part needs to be changed?
         if len(emotes) == 1:
             if emotes[0] not in emote_model:
                 continue
@@ -140,22 +140,38 @@ if __name__ == '__main__':
             else:
                 emote_vector = np.mean(vectors, axis=0)
             # print(emote_vector)
-        print("emote_vector", len(emote_vector))
+
+        # print("emote_vector", len(emote_vector))
         w_input = torch.tensor(word_vector)
-        print("word_tensor", w_input.shape)
+        # print("word_tensor", w_input.shape)
         e_input = torch.tensor(emote_vector)
-        print("emote_tensor", e_input.shape)
+        # print("emote_tensor", e_input.shape)
 
         input_concat = torch.cat([w_input, e_input])
-        #input_concat = input_concat.to(CONFIG["device"])
+        # input_concat = input_concat.to(CONFIG["device"])
         print(input_concat.shape)
+        inputs.append((w, input_concat))
 
-        output = model(input_concat)
-        print(output["z"].shape)
-        print("######\n")
-        tensors[w] = output["z"]
+    out_tensors = {}
+    # for w, tensor in inputs:
+    #     output = model(tensor)
+    #     out_tensors[w] = output["z"]
+    optimizer = optim.Adam(model.parameters(), CONFIG["lr"])
+    for epoch in range(args["epochs"]):
+        epoch_loss = []
+        for w, tensor in inputs:
+            optimizer.zero_grad()
+            # TODO
+            # Optimizer
+            output = model(tensor)
+            # print(output["z"].shape)
+            # print("######\n")
+            out_tensors[w] = output["z"]
+            loss = output["loss"]
+            loss.backward()
+            optimizer.step()
+            epoch_loss.append(output["loss"].item())
 
-    torch.save(tensors, out_path)
-    # loaded = torch.load("multimodal/testfile")
-    # print("### LOAD")
-    # print(loaded["('OMEGALUL', 'OMEGALUL')"])
+        print(np.mean(epoch_loss))
+
+    torch.save(out_tensors, out_path)
