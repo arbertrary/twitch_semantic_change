@@ -58,17 +58,12 @@ def load_gensim_model(model_path):
 
 
 def load_vocab(vocab_path):
-    v = []
     with open(vocab_path, "r") as jsonfile:
         vocab = json.loads(jsonfile.read())
         return vocab
 
 
 if __name__ == '__main__':
-    # vocab = load_vocab("vocab.json")
-    # print(vocab)
-    # exit()
-
     parser = argparse.ArgumentParser(description="generating an embedding")
     parser.add_argument("-e", "--emote_model", type=str, help="Path to the emote word embedding model")
     parser.add_argument("-w", "--word_model", type=str, help="Path to the word embedding model")
@@ -113,61 +108,58 @@ if __name__ == '__main__':
     # logging
 
     inputs = []
-    for w in vocabulary:
-        split = make_tuple(w)
+    for word_emote_tuple in vocabulary:
+        split = make_tuple(word_emote_tuple)
         word = split[0]
-        # print(w)
-        # print(word)
         emotes = list(split[1:])
-        # print(emotes)
         if word not in word_model:
-            continue
-        word_vector = word_model[word]
+            word_emote_tuple = word_emote_tuple.replace(word, "UNK")
+            word_vector = torch.empty(CONFIG["latent_dim"])
+        else:
+            word_vector = torch.tensor(word_model[word])
+
         print("word_vector", len(word_vector))
 
         # for the case of images possibly only this part needs to be changed?
         if len(emotes) == 1:
             if emotes[0] not in emote_model:
-                continue
-            emote_vector = emote_model[emotes[0]]
-        else:
-            vectors = [emote_model[emote] for emote in emotes if emote in emote_model]
-            # print(vectors)
-            if len(vectors) == 1:
-                emote_vector = vectors[0]
-            elif len(vectors) == 0:
-                continue
+                word_emote_tuple = word_emote_tuple.replace(emotes[0], "UNK_EM")
+                emote_vector = torch.empty(CONFIG["latent_dim"])
             else:
-                emote_vector = np.mean(vectors, axis=0)
-            # print(emote_vector)
+                emote_vector = torch.tensor(emote_model[emotes[0]])
+        else:
+            vectors = []
+            for emote in emotes:
+                if emote in emote_model:
+                    vectors.append(emote_model[emote])
+                else:
+                    word_emote_tuple = word_emote_tuple.replace(emote, "UNK_EM")
 
-        # print("emote_vector", len(emote_vector))
-        w_input = torch.tensor(word_vector)
-        # print("word_tensor", w_input.shape)
-        e_input = torch.tensor(emote_vector)
-        # print("emote_tensor", e_input.shape)
+            # vectors = [emote_model[emote] for emote in emotes if emote in emote_model]
+            if len(vectors) == 1:
+                emote_vector = torch.tensor(vectors[0])
+            elif len(vectors) == 0:
+                emote_vector = torch.empty(128)
+            else:
+                emote_vector = torch.tensor(np.mean(vectors, axis=0))
 
-        input_concat = torch.cat([w_input, e_input])
+        input_concat = torch.cat([word_vector, emote_vector])
         input_concat = input_concat.to(CONFIG["device"])
         print(input_concat.shape)
-        inputs.append((w, input_concat))
+        inputs.append((word_emote_tuple, input_concat))
 
     out_tensors = {}
-    # for w, tensor in inputs:
-    #     output = model(tensor)
-    #     out_tensors[w] = output["z"]
+
     optimizer = optim.Adam(model.parameters(), CONFIG["lr"])
     for epoch in range(args["epochs"]):
         epoch_loss = []
         for w, tensor in inputs:
             optimizer.zero_grad()
-            # TODO
-            # Optimizer
             output = model(tensor)
-            # print(output["z"].shape)
-            # print("######\n")
+
             out_tensors[w] = output["z"]
             loss = output["loss"]
+
             loss.backward()
             optimizer.step()
             epoch_loss.append(output["loss"].item())
