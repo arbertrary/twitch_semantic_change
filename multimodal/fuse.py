@@ -74,7 +74,7 @@ if __name__ == '__main__':
     parser.add_argument("-w", "--word_model", type=str, help="Path to the word embedding model")
     parser.add_argument("-v", "--vocab", type=str, help="Path to the multimodal vocabulary")
     parser.add_argument("-o", "--out_path", type=str, help="Path to the save location for the autofused tensors")
-    parser.add_argument("--epochs", type=int)
+    parser.add_argument("--epochs", type=int, default=10)
 
     args = vars(parser.parse_args())
 
@@ -91,9 +91,9 @@ if __name__ == '__main__':
     # torch.tensor() zu tensor machen
     # fused vektoren speichern in dictionary
     # word: tensor
-    # device = torch.device(CONFIG["device"])
+    device = torch.device(CONFIG["device"])
     model = AutoFusion(CONFIG, CONFIG["latent_dim"] * 2)
-    # model = model.to(device)
+    model = model.to(device)
 
     # TODO
     # Wie mach ich die Epochen? Hier noch ein
@@ -148,7 +148,7 @@ if __name__ == '__main__':
         # print("emote_tensor", e_input.shape)
 
         input_concat = torch.cat([w_input, e_input])
-        # input_concat = input_concat.to(CONFIG["device"])
+        input_concat = input_concat.to(CONFIG["device"])
         print(input_concat.shape)
         inputs.append((w, input_concat))
 
