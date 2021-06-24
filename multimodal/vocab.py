@@ -7,7 +7,7 @@ import argparse
 import json
 
 
-def build_vocabulary(in_path: str, out_path: str, min_count: int, skip_emotes: bool):
+def build_vocabulary(in_path: str, out_path: str, min_count: int, skip_emotes: int):
     counter = Counter()
 
     # for file in os.listdir(in_path):
@@ -16,23 +16,21 @@ def build_vocabulary(in_path: str, out_path: str, min_count: int, skip_emotes: b
     with open(filepath, "r", encoding="utf-8") as csvfile:
         reader = DictReader(csvfile, delimiter="\t")
         for row in reader:
-            message = row["msg"].strip()
-            # emote_ranges = str(row["emotes"]) + "/" + str(row["extemotes"])
-            # emotenames = get_emotes_in_message(message, emote_ranges)
+            message = row["msg"].strip().split()
             emotenames = row["emotenames"].split()
 
             tuplelist = []
-            for word in message.split():
+            for word in message:
                 if skip_emotes == 1 and word in emotenames:
-                     continue
-                tpl = tuple([word] + emotenames)
-                tuplelist.append([tpl])
-                # tuplelist.append([(word, emote)])
+                    continue
+                tpl = "|".join([word] + emotenames)
+                tuplelist.append(tpl)
 
-            # print(tuplelist)
-            counter.update(chain(*tuplelist))
+            print(tuplelist)
+            counter.update(tuplelist)
 
-    c = {str(x): count for x, count in sorted(counter.items(), key=lambda y: y[1], reverse=True) if count >= min_count}
+    c = {x: count for x, count in sorted(counter.items(), key=lambda y: y[1], reverse=True) if count >= min_count}
+
     with open(out_path, "w") as outfile:
         json.dump(OrderedDict(c), outfile, indent=2)
 
@@ -49,5 +47,5 @@ if __name__ == '__main__':
     outdir = args.outdir_path
 
     build_vocabulary(indir, outdir, args.min, args.skip_emotes)
-
-    # build_vocabulary("../data/testdata/emote_filtered/filtered_201911031555.txt", "vocab.json", min_count=2)
+    # build_vocabulary("../data/testdata/emote_filtered/filtered_201911031555.txt", "vocab.json", min_count=2,
+    #                  skip_emotes=0)
