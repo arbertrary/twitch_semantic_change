@@ -7,7 +7,7 @@ import argparse
 import json
 
 
-def build_vocabulary(in_path: str, out_path: str, min_count: int):
+def build_vocabulary(in_path: str, out_path: str, min_count: int, skip_emotes: bool):
     counter = Counter()
 
     # for file in os.listdir(in_path):
@@ -23,8 +23,8 @@ def build_vocabulary(in_path: str, out_path: str, min_count: int):
 
             tuplelist = []
             for word in message.split():
-                # if word in emotenames:
-                #     continue
+                if skip_emotes == 1 and word in emotenames:
+                     continue
                 tpl = tuple([word] + emotenames)
                 tuplelist.append([tpl])
                 # tuplelist.append([(word, emote)])
@@ -42,11 +42,12 @@ if __name__ == '__main__':
     parser.add_argument("-i", "--infiles_rootdir", type=str)
     parser.add_argument("-o", "--outdir_path")
     parser.add_argument("-m", "--min", type=int, default=100)
+    parser.add_argument("-e", "--skip_emotes", type=int, default=0)
     args = parser.parse_args()
 
     indir = args.infiles_rootdir
     outdir = args.outdir_path
 
-    build_vocabulary(indir, outdir, args.min)
+    build_vocabulary(indir, outdir, args.min, args.skip_emotes)
 
     # build_vocabulary("../data/testdata/emote_filtered/filtered_201911031555.txt", "vocab.json", min_count=2)

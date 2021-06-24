@@ -10,6 +10,8 @@ def rank_by_cosine(model1, model2, n):
     intersection_set = set.intersection(set([x for x in model1]), set([x for x in model2]))
     #print(str(intersection_set).encode("utf-8"))
     for word in intersection_set:
+        #if not "pseudoword" in word:
+        #    continue
         dist = cosine(model1[word].detach().cpu().numpy(), model2[word].detach().cpu().numpy())
         dists.append((word, dist))
 

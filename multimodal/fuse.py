@@ -114,7 +114,7 @@ if __name__ == '__main__':
         emotes = list(split[1:])
         if word not in word_model:
             word_emote_tuple = word_emote_tuple.replace(word, "UNK")
-            word_vector = torch.empty(CONFIG["latent_dim"])
+            word_vector = torch.zeros(CONFIG["latent_dim"])
         else:
             word_vector = torch.tensor(word_model[word])
 
@@ -124,7 +124,7 @@ if __name__ == '__main__':
         if len(emotes) == 1:
             if emotes[0] not in emote_model:
                 word_emote_tuple = word_emote_tuple.replace(emotes[0], "UNK_EM")
-                emote_vector = torch.empty(CONFIG["latent_dim"])
+                emote_vector = torch.zeros(CONFIG["latent_dim"])
             else:
                 emote_vector = torch.tensor(emote_model[emotes[0]])
         else:
@@ -139,7 +139,7 @@ if __name__ == '__main__':
             if len(vectors) == 1:
                 emote_vector = torch.tensor(vectors[0])
             elif len(vectors) == 0:
-                emote_vector = torch.empty(128)
+                emote_vector = torch.zeros(CONFIG["latent_dim"])
             else:
                 emote_vector = torch.tensor(np.mean(vectors, axis=0))
 
