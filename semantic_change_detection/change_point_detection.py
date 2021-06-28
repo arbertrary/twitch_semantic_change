@@ -14,6 +14,8 @@ import glob
 import itertools
 import csv
 import multiprocessing
+from gensim.scripts.glove2word2vec import glove2word2vec
+from gensim.test.utils import get_tmpfile, datapath
 
 
 def load_model(model_path):
@@ -23,9 +25,16 @@ def load_model(model_path):
     the KeyedVectors instance, model.wv). We call init_sims() to precompute L2-normalized vectors,
     using 'replace=True' to forget the original vectors and only keep the normalized ones (saves lots of memory).
     """
-    m = gensim.models.Word2Vec.load(model_path)
-    m = m.wv
-    m.init_sims(replace=True)
+    if options.glove:
+        tmp_file = get_tmpfile(model_path[1:])
+        glove_file = datapath(model_path)
+
+        _ = glove2word2vec(glove_file, tmp_file)
+        m = gensim.models.KeyedVectors.load_word2vec_format(tmp_file)
+    else:
+        m = gensim.models.Word2Vec.load(model_path)
+        m = m.wv
+        m.init_sims(replace=True)
     return m
 
 
@@ -63,7 +72,8 @@ def get_dist_dict(model_path, alignment_reference_model_path, comparison_referen
     dist_dict = {}
 
     for word in vocab:
-        if (word.startswith("!") or word.startswith("@") or word.startswith("http") or (word[-1] in string.punctuation) or (word[0] in string.punctuation)):
+        if (word.startswith("!") or word.startswith("@") or word.startswith("http") or (
+                word[-1] in string.punctuation) or (word[0] in string.punctuation)):
             continue
 
         if word in comparison_reference_model and word in model:
@@ -297,6 +307,7 @@ if __name__ == "__main__":
     parser.add_argument("-sg", "--skipgram", type=int, default=0, help="1 = skipgram, 0 = CBOW")
     parser.add_argument("--targets", type=str,
                         help="Path to a csv (or single column) file with target words. If present, only those will be cosidered")
+    parser.add_argument("--glove", action="store_true", default=False)
     options = parser.parse_args()
 
     targets_temp = []
@@ -324,9 +335,12 @@ if __name__ == "__main__":
 
     model_paths = []
     time_slice_labels = []
-    timeslices = sorted([ts for ts in os.listdir(options.models_rootdir) if os.path.isdir(os.path.join(options.models_rootdir,ts))])
-    
-    vocab_filepath = "{}/time_series_vocab_{}pc_wc{}_{}_to_{}.txt".format(options.models_rootdir, options.vocab_threshold,options.min_count, timeslices[0], timeslices[-1])
+    timeslices = sorted(
+        [ts for ts in os.listdir(options.models_rootdir) if os.path.isdir(os.path.join(options.models_rootdir, ts))])
+
+    vocab_filepath = "{}/time_series_vocab_{}pc_wc{}_{}_to_{}.txt".format(options.models_rootdir,
+                                                                          options.vocab_threshold, options.min_count,
+                                                                          timeslices[0], timeslices[-1])
 
     # (first_year, first_month) = (int(i) for i in options.first_timeslice.split('-'))
     # (last_year, last_month) = (int(i) for i in options.last_timeslice.split('-'))
@@ -567,11 +581,11 @@ if __name__ == "__main__":
         # outfile.write("\t".join(["word", "timestep", "p-value", "mean-shift", "z_score"]) + "\n")
         for (i, item) in enumerate(results):
             word = str(item[0])
-            
+
             # Filter words that are not in the optional target list
             if len(targets) != 0 and word not in targets:
                 continue
-            
+
             # If no target list is are specified, break after options.n_best
             if len(targets) == 0 and i > options.n_best:
                 break
