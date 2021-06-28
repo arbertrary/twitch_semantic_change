@@ -23,10 +23,7 @@ def load_model(model_path):
     the KeyedVectors instance, model.wv). We call init_sims() to precompute L2-normalized vectors,
     using 'replace=True' to forget the original vectors and only keep the normalized ones (saves lots of memory).
     """
-    if "w2v1" in model_path:
-        m = gensim.models.Word2Vec.load(model_path)
-    else:
-        m = gensim.models.FastText.load(model_path)
+    m = gensim.models.Word2Vec.load(model_path)
     m = m.wv
     m.init_sims(replace=True)
     return m
@@ -298,7 +295,6 @@ if __name__ == "__main__":
                         help="Include this flag to standardize the distances (i.e. use z-scores). If this flag is not "
                              "included, the raw cosine or neighbourhood scores will be used without standardization.")
     parser.add_argument("-sg", "--skipgram", type=int, default=0, help="1 = skipgram, 0 = CBOW")
-    parser.add_argument("-w2v", "--word2vec", type=int, default=0, help="Prefer fasttext")
     parser.add_argument("--targets", type=str,
                         help="Path to a csv (or single column) file with target words. If present, only those will be cosidered")
     options = parser.parse_args()
@@ -345,15 +341,12 @@ if __name__ == "__main__":
                 vocab.add(line.strip())
 
         for ts in timeslices:
-            model_path = "{}/{}/vec_{}_w{}_mc{}_iter{}_sg{}_lc{}_clean{}_w2v{}/saved_model.gensim".format(
+            model_path = "{}/{}/vec_{}_w{}_mc{}_iter{}_sg{}/saved_model.gensim".format(
                 options.models_rootdir, ts, options.vector_size,
                 options.window_size,
                 options.min_count,
                 options.no_of_iter,
-                options.skipgram,
-                options.lower_case,
-                options.clean,
-                options.word2vec)
+                options.skipgram)
             print(model_path)
             if os.path.isfile(model_path):
                 model_paths.append(model_path)
@@ -397,15 +390,12 @@ if __name__ == "__main__":
 
         vocab_counter = Counter()
         for ts in timeslices:
-            model_path = "{}/{}/vec_{}_w{}_mc{}_iter{}_sg{}_lc{}_clean{}_w2v{}/saved_model.gensim".format(
+            model_path = "{}/{}/vec_{}_w{}_mc{}_iter{}_sg{}/saved_model.gensim".format(
                 options.models_rootdir, ts, options.vector_size,
                 options.window_size,
                 options.min_count,
                 options.no_of_iter,
-                options.skipgram,
-                options.lower_case,
-                options.clean,
-                options.word2vec)
+                options.skipgram)
             try:
                 model = load_model(model_path)
             except FileNotFoundError:

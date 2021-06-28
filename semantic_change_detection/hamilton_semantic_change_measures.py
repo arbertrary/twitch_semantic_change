@@ -336,7 +336,7 @@ if __name__ == "__main__":
             _ = glove2word2vec(glove_file1, tmp_file1)
             model1 = gensim.models.KeyedVectors.load_word2vec_format(tmp_file1)
 
-            _ = glove2word2vec(glove_file1, tmp_file1)
+            _ = glove2word2vec(glove_file2, tmp_file2)
             model2 = gensim.models.KeyedVectors.load_word2vec_format(tmp_file2)
         else:
             model1 = gensim.models.Word2Vec.load(options.model1_filepath)
