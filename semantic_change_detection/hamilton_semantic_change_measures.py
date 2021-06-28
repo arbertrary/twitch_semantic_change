@@ -1,6 +1,8 @@
 #!/usr/bin/python3
 
 import gensim
+from gensim.scripts.glove2word2vec import glove2word2vec
+from gensim.test.utils import get_tmpfile, datapath
 import numpy as np
 import argparse
 import string
@@ -155,11 +157,11 @@ def rank_by_cosine(model1, model2, model1_filepath, model2_filepath, n, f, targe
     dists = []
     culled_vocab = [(word, model1.vocab[word].count) for word in model1.vocab]
     culled_vocab.sort(key=lambda tup: tup[1])
-    culled_vocab = culled_vocab[int(len(culled_vocab)*f):]
+    culled_vocab = culled_vocab[int(len(culled_vocab) * f):]
 
     culled_vocab2 = [(word, model2.vocab[word].count) for word in model2.vocab]
     culled_vocab2.sort(key=lambda tup: tup[1])
-    culled_vocab2 = culled_vocab2[int(len(culled_vocab2)*f):]
+    culled_vocab2 = culled_vocab2[int(len(culled_vocab2) * f):]
 
     intersection_set = set.intersection(set([x[0] for x in culled_vocab]), set([x[0] for x in culled_vocab2]))
 
@@ -170,10 +172,10 @@ def rank_by_cosine(model1, model2, model1_filepath, model2_filepath, n, f, targe
         if (word.startswith("!") or word.startswith("@") or word.startswith("http") or (
                 word[-1] in string.punctuation) or (word[0] in string.punctuation)):
             continue
-        #if model1.vocab[word].count > f and model2.vocab[word].count > f:
+        # if model1.vocab[word].count > f and model2.vocab[word].count > f:
         dist = cosine(model1[word], model2[word])
         dists.append((word, dist))
-    
+
     # sys.stdout.write('\nGOT DISTS')
 
     dists.sort(key=lambda x: x[1], reverse=True)
@@ -192,14 +194,14 @@ def rank_by_cosine(model1, model2, model1_filepath, model2_filepath, n, f, targe
 
     sys.stdout.write("\n\n{}".format(culled_vocab))
 
-    #sys.stdout.write('\n============================')
-    #sys.stdout.write('\n============================')
-    #sys.stdout.write('\nTOP WORDS BY COSINE DIST')
-    #sys.stdout.write('\n============================')
-    #sys.stdout.write('\n============================')
-    #sys.stdout.write('\n\n')
+    # sys.stdout.write('\n============================')
+    # sys.stdout.write('\n============================')
+    # sys.stdout.write('\nTOP WORDS BY COSINE DIST')
+    # sys.stdout.write('\n============================')
+    # sys.stdout.write('\n============================')
+    # sys.stdout.write('\n\n')
 
-    #for d in dists[:n]:
+    # for d in dists[:n]:
     #    sys.stdout.write(d[0])
     #    sys.stdout.write('\n============================')
     #    sys.stdout.write('\nModel1: ' + ' '.join([w for w, c in model1.most_similar(d[0], topn=10)]))
@@ -216,11 +218,11 @@ def rank_by_neighbourhood_shift(model1, model2, model1_filepath, model2_filepath
     dists = []
     culled_vocab = [(word, model1.vocab[word].count) for word in model1.vocab]
     culled_vocab.sort(key=lambda tup: tup[1])
-    culled_vocab = culled_vocab[int(len(culled_vocab)*f):]
+    culled_vocab = culled_vocab[int(len(culled_vocab) * f):]
 
     culled_vocab2 = [(word, model2.vocab[word].count) for word in model2.vocab]
     culled_vocab2.sort(key=lambda tup: tup[1])
-    culled_vocab2 = culled_vocab2[int(len(culled_vocab2)*f):]
+    culled_vocab2 = culled_vocab2[int(len(culled_vocab2) * f):]
 
     intersection_set = set.intersection(set([x[0] for x in culled_vocab]), set([x[0] for x in culled_vocab2]))
 
@@ -231,7 +233,7 @@ def rank_by_neighbourhood_shift(model1, model2, model1_filepath, model2_filepath
         if (word.startswith("!") or word.startswith("@") or word.startswith("http") or (
                 word[-1] in string.punctuation) or (word[0] in string.punctuation)):
             continue
-        #if model1.vocab[word].count > f and model2.vocab[word].count > f:
+        # if model1.vocab[word].count > f and model2.vocab[word].count > f:
         dist = measure_semantic_shift_by_neighborhood(model1, model2, word, k, verbose=False)
         dists.append((word, dist))
     # sys.stdout.write('\nGOT DISTS')
@@ -295,6 +297,7 @@ if __name__ == "__main__":
                         help="Path to file where results will be written")
     parser.add_argument("--targets", type=str,
                         help="Path to a csv (or single column) file with target words. If present, only those will be cosidered")
+    parser.add_argument("-g", "--glove", action="store_true", default=False)
     options = parser.parse_args()
 
     start_time = datetime.datetime.now()
@@ -323,12 +326,21 @@ if __name__ == "__main__":
             'Please specify which semantic change measure(s) to use by including at least one of --cosine, '
             '--cosine_unaligned, or --neighborhood.')
     else:
-        if "w2v1" in options.model1_filepath:
+
+        if options.glove:
+            tmp_file1 = get_tmpfile("w2v_model1.txt")
+            glove_file1 = datapath(options.model1_filepath)
+            tmp_file2 = get_tmpfile("w2v_model2.txt")
+            glove_file2 = datapath(options.model2_filepath)
+
+            _ = glove2word2vec(glove_file1, tmp_file1)
+            model1 = gensim.models.KeyedVectors.load_word2vec_format(tmp_file1)
+
+            _ = glove2word2vec(glove_file1, tmp_file1)
+            model2 = gensim.models.KeyedVectors.load_word2vec_format(tmp_file2)
+        else:
             model1 = gensim.models.Word2Vec.load(options.model1_filepath)
             model2 = gensim.models.Word2Vec.load(options.model2_filepath)
-        else:
-            model1 = gensim.models.FastText.load(options.model1_filepath)
-            model2 = gensim.models.FastText.load(options.model2_filepath)
 
         model1 = model1.wv
         model1.init_sims(replace=True)
@@ -350,7 +362,7 @@ if __name__ == "__main__":
 
             write_logfile(outfilepath, options, start_time)
             print(" Output and log file written to {}".format(options.outfiles_dir))
-        
+
         if options.neighborhood:
             n_best_by_neighborhood = rank_by_neighbourhood_shift(model1, model2, options.model1_filepath,
                                                                  options.model2_filepath, n=options.t_best,
@@ -368,4 +380,3 @@ if __name__ == "__main__":
 
             write_logfile(outfilepath, options, start_time)
             print("Output and log file written to {}".format(options.outfiles_dir))
-
