@@ -355,50 +355,22 @@ if __name__ == "__main__":
                 vocab.add(line.strip())
 
         for ts in timeslices:
-            model_path = "{}/{}/vec_{}_w{}_mc{}_iter{}_sg{}/saved_model.gensim".format(
-                options.models_rootdir, ts, options.vector_size,
-                options.window_size,
-                options.min_count,
-                options.no_of_iter,
-                options.skipgram)
-            print(model_path)
-            if os.path.isfile(model_path):
-                model_paths.append(model_path)
-                time_slice_labels.append(ts)
+            if options.glove:
+                model_path = "{}/{}/glove/vectors.txt".format(options.models_rootdir, ts)
+            else:
+                model_path = "{}/{}/vec_{}_w{}_mc{}_iter{}_sg{}/saved_model.gensim".format(
+                    options.models_rootdir, ts, options.vector_size,
+                    options.window_size,
+                    options.min_count,
+                    options.no_of_iter,
+                    options.skipgram)
+                print(model_path)
+                if os.path.isfile(model_path):
+                    model_paths.append(model_path)
+                    time_slice_labels.append(ts)
 
         n_models = len(model_paths)
 
-        # for year in range(2019, 2021):
-        #
-        #     if year < first_year:
-        #         continue
-        #     elif year > last_year:
-        #         break
-        #
-        #     for month in range(1, 13):
-        #
-        #         if year == first_year and month < first_month:
-        #             continue
-        #         elif year == last_year and month > last_month:
-        #             break
-        #
-        #         time_slice = "{}-{:02}".format(year, month)
-        #         model_path = "{}/{}{:02}/vec_{}_w{}_mc{}_iter{}_sg{}_lc{}_clean{}_w2v{}/saved_model.gensim".format(
-        #             options.models_rootdir, year, month, options.vector_size,
-        #             options.window_size,
-        #             options.min_count,
-        #             options.no_of_iter,
-        #             options.skipgram,
-        #             options.lower_case,
-        #             options.clean,
-        #             options.word2vec)
-        #         print(model_path)
-        #
-        #         if os.path.isfile(model_path):
-        #             model_paths.append(model_path)
-        #             time_slice_labels.append(time_slice)
-        #
-        # n_models = len(model_paths)
     else:
         # if we HAVEN'T already stored the common vocab, we DO need to load all the models and check their vocab
 
@@ -419,40 +391,6 @@ if __name__ == "__main__":
                 model_paths.append(model_path)
                 time_slice_labels.append(ts)
                 vocab_counter.update(model.vocab.keys())
-
-        # for year in range(2019, 2021):
-        #
-        #     if year < first_year:
-        #         continue
-        #     elif year > last_year:
-        #         break
-        #
-        #     for month in range(1, 13):
-        #
-        #         if year == first_year and month < first_month:
-        #             continue
-        #         elif year == last_year and month > last_month:
-        #             break
-        #
-        #         time_slice = "{}_{:02}".format(year, month)
-        #         model_path = "{}/{}{:02}/vec_{}_w{}_mc{}_iter{}_sg{}_lc{}_clean{}_w2v{}/saved_model.gensim".format(
-        #             options.models_rootdir, year, month, options.vector_size,
-        #             options.window_size,
-        #             options.min_count,
-        #             options.no_of_iter,
-        #             options.skipgram,
-        #             options.lower_case,
-        #             options.clean,
-        #             options.word2vec)
-        #         try:
-        #             model = load_model(model_path)
-        #         except FileNotFoundError:
-        #             pass
-        #         else:
-        #             print("loaded {} at {}".format(time_slice, datetime.datetime.now()))
-        #             model_paths.append(model_path)
-        #             time_slice_labels.append(time_slice)
-        #             vocab_counter.update(model.vocab.keys())
 
         n_models = len(model_paths)
         print(vocab_counter.most_common(10))
