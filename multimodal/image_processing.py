@@ -18,7 +18,11 @@ def get_image_tensors(in_dir, model):
     for image in os.listdir(in_dir):
         emotename = os.path.splitext(image)[0]
         filepath = os.path.join(in_dir, image)
-        input_image = Image.open(filepath).convert("RGB")
+        try:
+            input_image = Image.open(filepath).convert("RGB")
+        except OSError:
+            continue
+
         input_tensor = preprocess(input_image)
         input_batch = input_tensor.unsqueeze(0)  # create a mini-batch as expected by the model
 
@@ -47,6 +51,7 @@ if __name__ == '__main__':
     # out_path = "vgg_emote_tensors.pt"
 
     model = models.vgg19(pretrained=True)
+    model.train()
     print(model)
     model.classifier = nn.Sequential(
         nn.Linear(in_features=25088, out_features=128)
@@ -64,7 +69,7 @@ if __name__ == '__main__':
     ])
 
     out_tensors = {}
-    for emote_source in ["bttv"]:  # , "ffz", "global"]:
+    for emote_source in ["bttv", "ffz", "global"]:
         in_path = os.path.join(emote_dirs, emote_source)
         out_tensors.update(get_image_tensors(in_path, model))
 
