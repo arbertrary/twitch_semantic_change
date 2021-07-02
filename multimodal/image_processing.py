@@ -13,7 +13,8 @@ https://towardsdatascience.com/using-predefined-and-pretrained-cnns-in-pytorch-e
 """
 
 
-def get_image_tensors(in_dir, tensor_dict, model):
+def get_image_tensors(in_dir, model):
+    tensor_dict = {}
     for image in os.listdir(in_dir):
         emotename = os.path.splitext(image)[0]
         filepath = os.path.join(in_dir, image)
@@ -31,6 +32,7 @@ def get_image_tensors(in_dir, tensor_dict, model):
 
         # Tensor of shape 128
         tensor_dict[emotename] = output[0]
+    return tensor_dict
 
 
 if __name__ == '__main__':
@@ -46,8 +48,13 @@ if __name__ == '__main__':
 
     model = models.vgg19(pretrained=True)
     print(model)
+    model.classifier = nn.Sequential(
+        nn.Linear(in_features=25088, out_features=128)
+    )
+    print(model)
+    # exit()
     # Set final layer to output size 128 in accordance to our embedding sizes
-    model.classifier[6] = nn.Linear(in_features=4096, out_features=128)
+    # model.classifier[6] = nn.Linear(in_features=4096, out_features=128)
 
     preprocess = transforms.Compose([
         transforms.Resize(256),
@@ -57,9 +64,9 @@ if __name__ == '__main__':
     ])
 
     out_tensors = {}
-    for emote_source in ["bttv", "ffz", "global"]:
+    for emote_source in ["bttv"]:  # , "ffz", "global"]:
         in_path = os.path.join(emote_dirs, emote_source)
-        get_image_tensors(in_path, out_tensors, model)
+        out_tensors.update(get_image_tensors(in_path, model))
 
     torch.save(out_tensors, out_path)
 
