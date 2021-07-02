@@ -53,6 +53,7 @@ class AutoFusion(nn.Module):
 def load_gensim_model(model_path):
     m = gensim.models.Word2Vec.load(model_path)
     m = m.wv
+    # Vectors are normalized here, that means vectors_norm == m
     m.init_sims(replace=True)
     return m
 
@@ -69,6 +70,7 @@ if __name__ == '__main__':
     parser.add_argument("-w", "--word_model", type=str, help="Path to the word embedding model")
     parser.add_argument("-v", "--vocab", type=str, help="Path to the multimodal vocabulary")
     parser.add_argument("-o", "--out_path", type=str, help="Path to the save location for the autofused tensors")
+    parser.add_argument("-im", "--images",action="store_true", default=False )
     parser.add_argument("--epochs", type=int, default=10)
 
     args = vars(parser.parse_args())
@@ -79,7 +81,12 @@ if __name__ == '__main__':
     out_path = args["out_path"]
 
     vocabulary = load_vocab(vocab_path)
-    emote_model = load_gensim_model(emote_model_path)
+    if args["images"]:
+        emote_model = torch.load(emote_model_path)
+    else:
+        emote_model = load_gensim_model(emote_model_path)
+
+
     word_model = load_gensim_model(word_model_path)
     # Plan:
     # Embedding vektoren laden, mit
@@ -109,7 +116,8 @@ if __name__ == '__main__':
 
     inputs = []
     for word_emote_tuple in vocabulary:
-        split = make_tuple(word_emote_tuple)
+        # split = make_tuple(word_emote_tuple)
+        split = word_emote_tuple.split("|")
         word = split[0]
         emotes = list(split[1:])
         if word not in word_model:
