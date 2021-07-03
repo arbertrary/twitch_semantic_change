@@ -21,6 +21,8 @@ def rank_by_cosine(model1, model2, n):
     m = other_matrix.T.dot(base_matrix)
     u, _, v = np.linalg.svd(m)
     ortho = u.dot(v)
+    other_matrix = other_matrix.dot(ortho)
+
 
     print(base_matrix[0])
     # print(other_matrix[0])
@@ -31,7 +33,7 @@ def rank_by_cosine(model1, model2, n):
         # if not "pseudoword" in word:
         #    continue
         # dist = cosine(model1[word].detach().cpu().numpy(), model2[word].detach().cpu().numpy())
-        dist = cosine(base_matrix[i], ortho[i])
+        dist = cosine(base_matrix[i], other_matrix[i])
         dists.append((word, dist))
 
     dists.sort(key=lambda x: x[1], reverse=True)

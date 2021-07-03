@@ -7,6 +7,7 @@ from torch import nn
 import json
 from ast import literal_eval as make_tuple
 import numpy as np
+import os
 
 CONFIG = {
     "latent_dim": 128,
@@ -69,7 +70,8 @@ if __name__ == '__main__':
     parser.add_argument("-e", "--emote_model", type=str, help="Path to the emote word embedding model")
     parser.add_argument("-w", "--word_model", type=str, help="Path to the word embedding model")
     parser.add_argument("-v", "--vocab", type=str, help="Path to the multimodal vocabulary")
-    parser.add_argument("-o", "--out_path", type=str, help="Path to the save location for the autofused tensors")
+    parser.add_argument("-o", "--out_dir", type=str, help="Path to the save location for the autofused tensors")
+    parser.add_argument("-of","--out_filename",type=str, default="fused_vectors.pt")
     parser.add_argument("-im", "--images",action="store_true", default=False )
     parser.add_argument("--epochs", type=int, default=10)
 
@@ -78,7 +80,9 @@ if __name__ == '__main__':
     emote_model_path = args["emote_model"]
     word_model_path = args["word_model"]
     vocab_path = args["vocab"]
-    out_path = args["out_path"]
+    out_dir = args["out_dir"]
+    os.makedirs(out_dir, exist_ok=True)
+    out_path = os.path.join(out_dir, args["out_filename"])
 
     vocabulary = load_vocab(vocab_path)
     if args["images"]:
@@ -134,7 +138,10 @@ if __name__ == '__main__':
                 word_emote_tuple = word_emote_tuple.replace(emotes[0], "UNK_EM")
                 emote_vector = torch.zeros(CONFIG["latent_dim"])
             else:
-                emote_vector = torch.tensor(emote_model[emotes[0]])
+                if args["images"]:
+                    emote_vector = emote_model[emotes[0]]
+                else:
+                    emote_vector = torch.tensor(emote_model[emotes[0]])
         else:
             vectors = []
             for emote in emotes:
@@ -145,12 +152,21 @@ if __name__ == '__main__':
 
             # vectors = [emote_model[emote] for emote in emotes if emote in emote_model]
             if len(vectors) == 1:
-                emote_vector = torch.tensor(vectors[0])
+                if args["images"]:
+                    emote_vector = vectors[0]
+                else:
+                    emote_vector = torch.tensor(vectors[0])
             elif len(vectors) == 0:
                 emote_vector = torch.zeros(CONFIG["latent_dim"])
             else:
-                emote_vector = torch.tensor(np.mean(vectors, axis=0))
-
+                if args["images"]:
+                    stacked = torch.stack(vectors)
+                    emote_vector = torch.mean(stacked, dim=0)
+                else:
+                    emote_vector = torch.tensor(np.mean(vectors, axis=0))
+        
+        word_vector = word_vector.to(CONFIG["device"])
+        emote_vector = emote_vector.to(CONFIG["device"])
         input_concat = torch.cat([word_vector, emote_vector])
         input_concat = input_concat.to(CONFIG["device"])
         print(input_concat.shape)

@@ -11,6 +11,7 @@ https://pytorch.org/hub/pytorch_vision_vgg/
 https://pytorch.org/tutorials/beginner/finetuning_torchvision_models_tutorial.html#vgg
 https://towardsdatascience.com/using-predefined-and-pretrained-cnns-in-pytorch-e3447cbe9e3c
 """
+os.environ['TORCH_HOME'] = "/home/stud/bernstetter/.cache/torch"
 
 
 def get_image_tensors(in_dir, model):
@@ -28,8 +29,8 @@ def get_image_tensors(in_dir, model):
 
         # move the input and model to GPU for speed if available
         if torch.cuda.is_available():
-            input_batch = input_batch.to('cuda')
-            model.to('cuda')
+            input_batch = input_batch.to('cuda:0')
+            model.to('cuda:0')
 
         with torch.no_grad():
             output = model(input_batch)
