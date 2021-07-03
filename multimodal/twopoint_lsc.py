@@ -4,29 +4,55 @@ from scipy.spatial.distance import cosine
 import os
 import numpy as np
 
+CONFIG = {"latent_dims": 128}
 
-def rank_by_cosine(model1, model2, n):
-    dists = []
 
-    intersection_set = list(set.intersection(set([x for x in model1]), set([x for x in model2])))
+def align_models(model1, model2):
+    """
+    Align model2 to model1
+    """
+    intersection_vocab = list(set.intersection(set([x for x in model1]), set([x for x in model2])))
     # generate matrices for both
     # with the words/indices being the same
-    base_matrix = np.empty((len(intersection_set), 128))
-    other_matrix = np.empty((len(intersection_set), 128))
+    alignment_reference_matrix = np.empty((len(intersection_vocab), CONFIG["latent_dims"]))
+    other_matrix = np.empty((len(intersection_vocab), CONFIG["latent_dims"]))
 
-    for i, word in enumerate(intersection_set):
-        base_matrix[i] = (model1[word].detach().cpu().numpy())
+    for i, word in enumerate(intersection_vocab):
+        alignment_reference_matrix[i] = (model1[word].detach().cpu().numpy())
         other_matrix[i] = (model2[word].detach().cpu().numpy())
 
-    m = other_matrix.T.dot(base_matrix)
+    m = other_matrix.T.dot(alignment_reference_matrix)
     u, _, v = np.linalg.svd(m)
     ortho = u.dot(v)
     other_matrix = other_matrix.dot(ortho)
 
+    return intersection_vocab, alignment_reference_matrix, other_matrix
 
-    print(base_matrix[0])
-    # print(other_matrix[0])
-    print(ortho[0])
+
+def rank_by_cosine(model1, model2, n):
+    dists = []
+
+    # intersection_set = list(set.intersection(set([x for x in model1]), set([x for x in model2])))
+    # # generate matrices for both
+    # # with the words/indices being the same
+    # base_matrix = np.empty((len(intersection_set), 128))
+    # other_matrix = np.empty((len(intersection_set), 128))
+    #
+    # for i, word in enumerate(intersection_set):
+    #     base_matrix[i] = (model1[word].detach().cpu().numpy())
+    #     other_matrix[i] = (model2[word].detach().cpu().numpy())
+    #
+    # m = other_matrix.T.dot(base_matrix)
+    # u, _, v = np.linalg.svd(m)
+    # ortho = u.dot(v)
+    # other_matrix = other_matrix.dot(ortho)
+    #
+    #
+    # print(base_matrix[0])
+    # # print(other_matrix[0])
+    # print(ortho[0])
+
+    intersection_set, base_matrix, other_matrix = align_models(model1, model2)
 
     # print(str(intersection_set).encode("utf-8"))
     for i, word in enumerate(intersection_set):

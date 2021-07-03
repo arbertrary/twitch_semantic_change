@@ -71,8 +71,7 @@ if __name__ == '__main__':
     parser.add_argument("-w", "--word_model", type=str, help="Path to the word embedding model")
     parser.add_argument("-v", "--vocab", type=str, help="Path to the multimodal vocabulary")
     parser.add_argument("-o", "--out_dir", type=str, help="Path to the save location for the autofused tensors")
-    parser.add_argument("-of","--out_filename",type=str, default="fused_vectors.pt")
-    parser.add_argument("-im", "--images",action="store_true", default=False )
+    parser.add_argument("-im", "--images", action="store_true", default=False)
     parser.add_argument("--epochs", type=int, default=10)
 
     args = vars(parser.parse_args())
@@ -82,14 +81,12 @@ if __name__ == '__main__':
     vocab_path = args["vocab"]
     out_dir = args["out_dir"]
     os.makedirs(out_dir, exist_ok=True)
-    out_path = os.path.join(out_dir, args["out_filename"])
 
     vocabulary = load_vocab(vocab_path)
     if args["images"]:
         emote_model = torch.load(emote_model_path)
     else:
         emote_model = load_gensim_model(emote_model_path)
-
 
     word_model = load_gensim_model(word_model_path)
     # Plan:
@@ -164,7 +161,7 @@ if __name__ == '__main__':
                     emote_vector = torch.mean(stacked, dim=0)
                 else:
                     emote_vector = torch.tensor(np.mean(vectors, axis=0))
-        
+
         word_vector = word_vector.to(CONFIG["device"])
         emote_vector = emote_vector.to(CONFIG["device"])
         input_concat = torch.cat([word_vector, emote_vector])
@@ -190,4 +187,4 @@ if __name__ == '__main__':
 
         print(np.mean(epoch_loss))
 
-    torch.save(out_tensors, out_path)
+    torch.save(out_tensors, os.path.join(out_dir, "fused_vectors.pt"))
