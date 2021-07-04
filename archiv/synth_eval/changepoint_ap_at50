@@ -1,96 +1,84 @@
 
-
 # dta_first_sg0_raw_metrics.tsv
 0.3914553780595442
-
 
 # dta_first_sg0_z_metrics.tsv
 0.4555310538606267
 
-
 # dta_first_sg1_raw_metrics.tsv
 0.38027688857611186
-
 
 # dta_first_sg1_z_metrics.tsv
 0.3878423260180003
 
-
 # dta_last_sg0_raw_metrics.tsv
 0.4856749200707146
-
 
 # dta_last_sg0_z_metrics.tsv
 0.5422636438278822
 
-
 # dta_last_sg1_raw_metrics.tsv
 0.4692821302971281
-
 
 # dta_last_sg1_z_metrics.tsv
 0.50322000311401
 
-
 # tw_30s_first_sg0_raw_metrics.tsv
 0.25813776518120235
-
 
 # tw_30s_first_sg0_z_metrics.tsv
 0.23120471257218939
 
-
 # tw_30s_first_sg1_raw_metrics.tsv
 0.18965699070384784
-
 
 # tw_30s_first_sg1_z_metrics.tsv
 0.22082056590444066
 
-
 # tw_30s_last_sg0_raw_metrics.tsv
 0.37435108185625127
-
 
 # tw_30s_last_sg0_z_metrics.tsv
 0.37114125504755213
 
-
 # tw_30s_last_sg1_raw_metrics.tsv
 0.2814665542828314
-
 
 # tw_30s_last_sg1_z_metrics.tsv
 0.2613306141006831
 
+# tw_60s_first_sg0_z_metrics.tsv
+0.24289841186392905
+
+# tw_60s_first_sg1_z_metrics.tsv
+0.19881118582946264
+
+# tw_60s_last_sg0_z_metrics.tsv
+0.3272144554751346
+
+# tw_60s_last_sg1_z_metrics.tsv
+0.3189376801418187
 
 # tw_un_first_sg0_raw_metrics.tsv
 0.3604100654664983
 
-
 # tw_un_first_sg0_z_metrics.tsv
 0.3442272296948525
-
 
 # tw_un_first_sg1_raw_metrics.tsv
 0.26420182331489733
 
-
 # tw_un_first_sg1_z_metrics.tsv
 0.2589488909684595
-
 
 # tw_un_last_sg0_raw_metrics.tsv
 0.39868825141168407
 
-
 # tw_un_last_sg0_z_metrics.tsv
 0.39890805096397763
 
-
 # tw_un_last_sg1_raw_metrics.tsv
 0.37250867285274386
-
 
 # tw_un_last_sg1_z_metrics.tsv
 0.43172552221097016
