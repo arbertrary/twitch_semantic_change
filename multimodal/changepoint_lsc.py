@@ -204,11 +204,13 @@ if __name__ == '__main__':
                         help="which model's vector to compare every other model's vector to: 'first', 'last', or 'previous'")
     parser.add_argument("-v", "--vocab_threshold", type=int, default=75,
                         help="percent of models which must contain word in order for it to be included")
-    parser.add_argument("-t", "--t_best", type=int, default=20, help="Number of top-ranked words to output")
+    parser.add_argument("-t", "--t_best", type=int, default=1000, help="Number of top-ranked words to output")
     parser.add_argument("-o", "--outfiles_dir", type=str,
                         help="Path to file where results will be written")
     parser.add_argument("-s", "--n_samples", type=int, default=100,
                         help="Number of samples to draw for permutation test")
+    parser.add_argument("-p", "--p_value_threshold", type=float, default=0.05, help="P-value cut-off")
+    parser.add_argument("-g", "--gamma_threshold", type=float, default=0, help="Minimum z-score magnitude.")
     options = parser.parse_args()
 
     start_time = datetime.datetime.now()
@@ -269,8 +271,8 @@ if __name__ == '__main__':
         print(time_slices_used)
 
     else:
-        print("STOP BEFORE THE DIST DICTS ARE CALCULATED AGAIN")
-        exit()
+        #print("STOP BEFORE THE DIST DICTS ARE CALCULATED AGAIN")
+        #exit()
 
         # try:
         #     set_start_method('spawn')
@@ -316,7 +318,7 @@ if __name__ == '__main__':
     outfile_path = options.outfiles_dir + '/time_series_analysis_NOT_standardized_output_f{}_l{}_a{}_c{}_s{}_v{}.tsv'.format(
         timeslices[0], timeslices[-1], options.align_to, options.compare_to, options.n_samples, options.vocab_threshold)
 
-    with open(outfile_path, 'w') as outfile:
+    with open(outfile_path, 'w',encoding="utf-8") as outfile:
         # outfile.write("\t".join(["word", "timestep", "p-value", "mean-shift", "z_score"]) + "\n")
         for (i, item) in enumerate(results):
             word = str(item[0])

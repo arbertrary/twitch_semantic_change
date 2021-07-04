@@ -16,6 +16,7 @@ import csv
 import multiprocessing
 from gensim.scripts.glove2word2vec import glove2word2vec
 from gensim.test.utils import get_tmpfile, datapath
+import random
 
 
 def load_model(model_path):
@@ -26,15 +27,19 @@ def load_model(model_path):
     using 'replace=True' to forget the original vectors and only keep the normalized ones (saves lots of memory).
     """
     if options.glove:
-        tmp_file = get_tmpfile(model_path[1:])
+        print("LOADING GLOVE MODEL")
+        n = random.randint(1,2000)
+        tmp_file = get_tmpfile(str(n)+".txt")
         glove_file = datapath(model_path)
 
         _ = glove2word2vec(glove_file, tmp_file)
         m = gensim.models.KeyedVectors.load_word2vec_format(tmp_file)
     else:
         m = gensim.models.Word2Vec.load(model_path)
-        m = m.wv
-        m.init_sims(replace=True)
+    
+    m = m.wv
+    m.init_sims(replace=True)
+    
     return m
 
 
@@ -364,10 +369,10 @@ if __name__ == "__main__":
                     options.min_count,
                     options.no_of_iter,
                     options.skipgram)
-                print(model_path)
-                if os.path.isfile(model_path):
-                    model_paths.append(model_path)
-                    time_slice_labels.append(ts)
+            print(model_path)
+            if os.path.isfile(model_path):
+                model_paths.append(model_path)
+                time_slice_labels.append(ts)
 
         n_models = len(model_paths)
 
@@ -376,12 +381,17 @@ if __name__ == "__main__":
 
         vocab_counter = Counter()
         for ts in timeslices:
-            model_path = "{}/{}/vec_{}_w{}_mc{}_iter{}_sg{}/saved_model.gensim".format(
-                options.models_rootdir, ts, options.vector_size,
-                options.window_size,
-                options.min_count,
-                options.no_of_iter,
-                options.skipgram)
+            print("I'M HERE")
+            if options.glove:
+                model_path = "{}/{}/glove/vectors.txt".format(options.models_rootdir, ts)
+                print(model_path)
+            else:
+                model_path = "{}/{}/vec_{}_w{}_mc{}_iter{}_sg{}/saved_model.gensim".format(
+                    options.models_rootdir, ts, options.vector_size,
+                    options.window_size,
+                    options.min_count,
+                    options.no_of_iter,
+                    options.skipgram)
             try:
                 model = load_model(model_path)
             except FileNotFoundError:
