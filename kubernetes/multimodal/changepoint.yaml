@@ -1,34 +1,32 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: build-vocab-{{ month }}
+  name: changepoint-fused-img
   namespace: studbernstetter
   annotations:
-    description: "create emote corpus files"
+    description: "detect change"
 spec:
   template:
     spec:
       priorityClassName: research-low
-      imagePullSecrets:
-        - name: gitlab-registry-bernstetter
       containers:
-        - name: pythonbase
-          image: gitlab2.informatik.uni-wuerzburg.de:4567/s319059/containers/pythonbase
+        - name: pytorch
+          image: lsx-harbor.informatik.uni-wuerzburg.de/containers/pytorch:latest
           imagePullPolicy: "Always"
           resources:
             limits:
-              cpu: "12"
-              memory: "32Gi"
+                    #nvidia.com/gpu: "1"
+              cpu: "11"
+              memory: "12Gi"
             requests:
+                    #nvidia.com/gpu: "1"
               cpu: "1"
               memory: "4Gi"
           command:
             - "python3"
-            - "/home/stud/bernstetter/ma/mainrepo/multimodal/vocab.py"
-            - "--infiles_rootdir=/home/stud/bernstetter/datasets/twitch_multimodal/synthetic/subsampled_70/{{ month }}.tsv"
-            - "--outdir_path=/home/stud/bernstetter/datasets/twitch_multimodal/synthetic/vocabs/{{ month }}_multimodal_vocab.json"
-            - "--min=100"
-            - "--skip_emotes=0"
+            - "/home/stud/bernstetter/ma/mainrepo/multimodal/changepoint_lsc.py"
+            - "--models_rootdir=/home/stud/bernstetter/models/twitch_multimodal/fused_embeddings/sg1_images"
+            - "--outfiles_dir=/home/stud/bernstetter/models/twitch_multimodal/results/changepoint/sg1_images/"
           volumeMounts:
             - mountPath: /home/stud/bernstetter
               name: home

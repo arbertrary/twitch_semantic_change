@@ -1,0 +1,45 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: fuse-202003-sg0
+  namespace: studbernstetter
+  annotations:
+    description: "Fuse vectors of word and emote embeddings"
+spec:
+  template:
+    spec:
+      priorityClassName: research-med
+      containers:
+        - name: pytorch
+          image: lsx-harbor.informatik.uni-wuerzburg.de/containers/pytorch:latest
+          imagePullPolicy: "Always"
+          resources:
+            limits:
+              nvidia.com/gpu: "1"
+              cpu: "12"
+              memory: "32Gi"
+            requests:
+              nvidia.com/gpu: "1"
+              cpu: "1"
+              memory: "4Gi"
+          command:
+            - "python3"
+            - "/home/stud/bernstetter/ma/mainrepo/multimodal/fuse.py"
+            - "--emote_model=/home/stud/bernstetter/models/twitch_multimodal/emote_embeddings/vec_128_w5_mc500_iter10_sg0/saved_model.gensim" 
+            - "--word_model=/home/stud/bernstetter/models/twitch_multimodal/word_embeddings/202003/vec_128_w5_mc100_iter10_sg0/saved_model.gensim" 
+            - "--vocab=/home/stud/bernstetter/datasets/twitch_multimodal/synthetic/vocabs/202003_multimodal_vocab.json"
+            - "--out_dir=/home/stud/bernstetter/models/twitch_multimodal/fused_embeddings/sg0/202003"
+            - "--epochs=2"
+          volumeMounts:
+            - mountPath: /home/stud/bernstetter
+              name: home
+      restartPolicy: "Never"
+      volumes:
+        - name: home
+          cephfs:
+            monitors:
+              - 132.187.14.16,132.187.14.17,132.187.14.19,132.187.14.20
+            user: studbernstetter
+            path: "/home/stud/bernstetter"
+            secretRef:
+              name: ceph-secret-studbernstetter

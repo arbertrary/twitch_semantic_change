@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: build-vocab-{{ month }}
+  name: build-vocab-202001
   namespace: studbernstetter
   annotations:
     description: "create emote corpus files"
@@ -25,8 +25,8 @@ spec:
           command:
             - "python3"
             - "/home/stud/bernstetter/ma/mainrepo/multimodal/vocab.py"
-            - "--infiles_rootdir=/home/stud/bernstetter/datasets/twitch_multimodal/synthetic/subsampled_70/{{ month }}.tsv"
-            - "--outdir_path=/home/stud/bernstetter/datasets/twitch_multimodal/synthetic/vocabs/{{ month }}_multimodal_vocab.json"
+            - "--infiles_rootdir=/home/stud/bernstetter/datasets/twitch_multimodal/synthetic/subsampled_70/202001.tsv"
+            - "--outdir_path=/home/stud/bernstetter/datasets/twitch_multimodal/synthetic/vocabs/202001_multimodal_vocab.json"
             - "--min=100"
             - "--skip_emotes=0"
           volumeMounts:

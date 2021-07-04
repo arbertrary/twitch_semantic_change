@@ -1,10 +1,10 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: build-vocab-{{ month }}
+  name: synth-glove-202002
   namespace: studbernstetter
   annotations:
-    description: "create emote corpus files"
+    description: "template for doing anything in my home"
 spec:
   template:
     spec:
@@ -18,17 +18,14 @@ spec:
           resources:
             limits:
               cpu: "12"
-              memory: "32Gi"
+              memory: "16Gi"
             requests:
               cpu: "1"
               memory: "4Gi"
           command:
-            - "python3"
-            - "/home/stud/bernstetter/ma/mainrepo/multimodal/vocab.py"
-            - "--infiles_rootdir=/home/stud/bernstetter/datasets/twitch_multimodal/synthetic/subsampled_70/{{ month }}.tsv"
-            - "--outdir_path=/home/stud/bernstetter/datasets/twitch_multimodal/synthetic/vocabs/{{ month }}_multimodal_vocab.json"
-            - "--min=100"
-            - "--skip_emotes=0"
+            - "/home/stud/bernstetter/ma/GloVe/demo.sh"
+            - "-i /home/stud/bernstetter/datasets/synthetic_twitch/ungrouped/subsampled_70/202002.txt"
+            - "-o /home/stud/bernstetter/models/synthetic_twitch/ungrouped/202002/glove"
           volumeMounts:
             - mountPath: /home/stud/bernstetter
               name: home

@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: evaluate-2p-sg1-cos
+  name: evaluate-2p
   namespace: studbernstetter
   annotations:
     description: "evaluate"
@@ -25,10 +25,10 @@ spec:
           command:
             - "python3"
             - "/home/stud/bernstetter/ma/initial/evaluation/evaluate_synthetic_data_results.py"
-            - "--results_dir=/home/stud/bernstetter/models/dta/results/hamilton/vec_128_w5_mc100_iter10_sg1_lc0_clean0_w2v1/"
+            - "--results_dir=/home/stud/bernstetter/models/synthetic_twitch/ungrouped_results/hamilton/glove/"
             - "--results_fn=cosine.tsv"
             - "--word_column=1"
-            - "--pseudoword_design_dict=/home/stud/bernstetter/datasets/dta/synth_dta/pseudoword_dict.json"
+            - "--pseudoword_design_dict=/home/stud/bernstetter/datasets/synthetic_twitch/pseudoword_dict.json"
           volumeMounts:
             - mountPath: /home/stud/bernstetter
               name: home

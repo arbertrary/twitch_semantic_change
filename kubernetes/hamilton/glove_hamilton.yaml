@@ -1,10 +1,10 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: build-vocab-{{ month }}
+  name: glove-ham-test
   namespace: studbernstetter
   annotations:
-    description: "create emote corpus files"
+    description: "detect change"
 spec:
   template:
     spec:
@@ -17,18 +17,24 @@ spec:
           imagePullPolicy: "Always"
           resources:
             limits:
-              cpu: "12"
-              memory: "32Gi"
+              cpu: "8"
+              memory: "8Gi"
             requests:
-              cpu: "1"
+              cpu: "2"
               memory: "4Gi"
           command:
             - "python3"
-            - "/home/stud/bernstetter/ma/mainrepo/multimodal/vocab.py"
-            - "--infiles_rootdir=/home/stud/bernstetter/datasets/twitch_multimodal/synthetic/subsampled_70/{{ month }}.tsv"
-            - "--outdir_path=/home/stud/bernstetter/datasets/twitch_multimodal/synthetic/vocabs/{{ month }}_multimodal_vocab.json"
-            - "--min=100"
-            - "--skip_emotes=0"
+            - "/home/stud/bernstetter/ma/mainrepo/semantic_change_detection/hamilton_semantic_change_measures.py"
+            - "--model1_filepath=/home/stud/bernstetter/models/synthetic_twitch/30s_grouped/201905/glove/vectors.txt"
+            - "--model2_filepath=/home/stud/bernstetter/models/synthetic_twitch/30s_grouped/202004/glove/vectors.txt"
+            - "--outfiles_dir=/home/stud/bernstetter/models/synthetic_twitch/30s_grouped_results/hamilton/glove/"
+              #- "--targets=/home/stud/bernstetter/ma/mainrepo/data/targets/surel_targets.csv"
+            - "--t_best=100"
+            - "--k_neighbors=5"
+            - "--frequency_threshold=0.1"
+            - "--cosine" 
+            - "--glove"
+            - "--neighborhood"
           volumeMounts:
             - mountPath: /home/stud/bernstetter
               name: home

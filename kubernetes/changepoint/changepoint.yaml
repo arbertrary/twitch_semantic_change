@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: twitch-cp-sg0-last
+  name: 60s-cp-last-sg0
   namespace: studbernstetter
   annotations:
     description: "detect changepoint"
@@ -25,20 +25,17 @@ spec:
           command:
             - "python3"
             - "/home/stud/bernstetter/ma/mainrepo/semantic_change_detection/change_point_detection.py"
-            - "--models_rootdir=/home/stud/bernstetter/models/twitch/ungrouped/"
-            - "--outfiles_dir=/home/stud/bernstetter/models/twitch/ungrouped_results/changepoint/sg0_targets_meanshifttest/"
-            - "--targets=/home/stud/bernstetter/ma/mainrepo/data/targets/twitch_targets.csv"
+            - "--models_rootdir=/home/stud/bernstetter/models/synthetic_twitch/60s_grouped/"
+            - "--outfiles_dir=/home/stud/bernstetter/models/synthetic_twitch/60s_grouped_results/changepoint/sg0/"
+              #- "--targets=/home/stud/bernstetter/ma/mainrepo/data/targets/twitch_targets.csv"
             - "--distance_measure=cosine"
-            - "--k_neighbors=25"
             - "--min_count=100"
             - "--skipgram=1"
             - "--no_of_iter=10"
-            - "--word2vec=1"
             - "--z_scores"
             - "--align_to=last"
             - "--compare_to=last"
-            - "--vocab_threshold=75"
-            - "--clean=0"
+            - "--vocab_threshold=50"
           volumeMounts:
             - mountPath: /home/stud/bernstetter
               name: home

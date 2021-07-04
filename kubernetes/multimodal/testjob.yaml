@@ -1,10 +1,10 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: build-vocab-{{ month }}
+  name: fuse-201905
   namespace: studbernstetter
   annotations:
-    description: "create emote corpus files"
+    description: "Fuse vectors of word and emote embeddings"
 spec:
   template:
     spec:
@@ -12,23 +12,25 @@ spec:
       imagePullSecrets:
         - name: gitlab-registry-bernstetter
       containers:
-        - name: pythonbase
-          image: gitlab2.informatik.uni-wuerzburg.de:4567/s319059/containers/pythonbase
+        - name: pytorch
+          image: lsx-harbor.informatik.uni-wuerzburg.de/containers/pytorch:latest
           imagePullPolicy: "Always"
           resources:
             limits:
+                    #nvidia.com/gpu: "1"
               cpu: "12"
               memory: "32Gi"
             requests:
+                    #nvidia.com/gpu: "1"
               cpu: "1"
               memory: "4Gi"
           command:
             - "python3"
-            - "/home/stud/bernstetter/ma/mainrepo/multimodal/vocab.py"
-            - "--infiles_rootdir=/home/stud/bernstetter/datasets/twitch_multimodal/synthetic/subsampled_70/{{ month }}.tsv"
-            - "--outdir_path=/home/stud/bernstetter/datasets/twitch_multimodal/synthetic/vocabs/{{ month }}_multimodal_vocab.json"
-            - "--min=100"
-            - "--skip_emotes=0"
+            - "/home/stud/bernstetter/ma/mainrepo/multimodal/fuse.py"
+            - "--emote_model=/home/stud/bernstetter/models/twitch_multimodal/emote_embeddings/vec_128_w5_mc500_iter10_sg0/saved_model.gensim" 
+            - "--word_model=/home/stud/bernstetter/models/twitch_multimodal/word_embeddings/201906/vec_128_w5_mc100_iter10_sg1/saved_model.gensim" 
+            - "--vocab=/home/stud/bernstetter/datasets/twitch_multimodal/synthetic/vocabs/201906_full_multimodal_vocab.json"
+            - "--out_path=/home/stud/bernstetter/models/twitch_multimodal/fused_embeddings/sg0/201906_fused_vectors.pt"
           volumeMounts:
             - mountPath: /home/stud/bernstetter
               name: home

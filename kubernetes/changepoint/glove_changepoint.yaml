@@ -1,10 +1,10 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: build-vocab-{{ month }}
+  name: glove-30s-lst
   namespace: studbernstetter
   annotations:
-    description: "create emote corpus files"
+    description: "detect changepoint"
 spec:
   template:
     spec:
@@ -20,15 +20,22 @@ spec:
               cpu: "12"
               memory: "32Gi"
             requests:
-              cpu: "1"
-              memory: "4Gi"
+              cpu: "4"
+              memory: "8Gi"
           command:
             - "python3"
-            - "/home/stud/bernstetter/ma/mainrepo/multimodal/vocab.py"
-            - "--infiles_rootdir=/home/stud/bernstetter/datasets/twitch_multimodal/synthetic/subsampled_70/{{ month }}.tsv"
-            - "--outdir_path=/home/stud/bernstetter/datasets/twitch_multimodal/synthetic/vocabs/{{ month }}_multimodal_vocab.json"
-            - "--min=100"
-            - "--skip_emotes=0"
+            - "/home/stud/bernstetter/ma/mainrepo/semantic_change_detection/change_point_detection.py"
+            - "--models_rootdir=/home/stud/bernstetter/models/synthetic_twitch/30s_grouped"
+            - "--outfiles_dir=/home/stud/bernstetter/models/synthetic_twitch/30s_grouped_results/changepoint/glove/"
+              #- "--targets=/home/stud/bernstetter/ma/mainrepo/data/targets/twitch_targets.csv"
+            - "--distance_measure=cosine"
+            - "--min_count=100"
+            - "--glove"
+            - "--no_of_iter=10"
+            - "--z_scores"
+            - "--align_to=last"
+            - "--compare_to=last"
+            - "--vocab_threshold=75"
           volumeMounts:
             - mountPath: /home/stud/bernstetter
               name: home

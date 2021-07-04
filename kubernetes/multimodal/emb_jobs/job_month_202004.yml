@@ -1,10 +1,10 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: build-vocab-{{ month }}
+  name: embedding-202004-sg1
   namespace: studbernstetter
   annotations:
-    description: "create emote corpus files"
+    description: "creating embeddings"
 spec:
   template:
     spec:
@@ -18,17 +18,21 @@ spec:
           resources:
             limits:
               cpu: "12"
-              memory: "32Gi"
+              memory: "16Gi"
             requests:
-              cpu: "1"
+              cpu: "4"
               memory: "4Gi"
           command:
             - "python3"
-            - "/home/stud/bernstetter/ma/mainrepo/multimodal/vocab.py"
-            - "--infiles_rootdir=/home/stud/bernstetter/datasets/twitch_multimodal/synthetic/subsampled_70/{{ month }}.tsv"
-            - "--outdir_path=/home/stud/bernstetter/datasets/twitch_multimodal/synthetic/vocabs/{{ month }}_multimodal_vocab.json"
-            - "--min=100"
-            - "--skip_emotes=0"
+            - "/home/stud/bernstetter/ma/mainrepo/multimodal/embeddings.py"
+            - "--input_dir=/home/stud/bernstetter/datasets/twitch_multimodal/synthetic/subsampled_70/202004.tsv"
+            - "--model_dir=/home/stud/bernstetter/models/twitch_multimodal/word_embeddings/202004"
+            - "--worker_count=11"
+            - "--skipgram=1"
+            - "--epoch_count=10"
+            - "--word_min_count=100"
+            - "--vector_size=128"
+            - "--window_size=5"
           volumeMounts:
             - mountPath: /home/stud/bernstetter
               name: home
