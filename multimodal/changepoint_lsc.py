@@ -12,9 +12,14 @@ import itertools
 import twopoint_lsc as tp
 from torch.multiprocessing import Pool, set_start_method
 
+try:
+    set_start_method('spawn')
+except RuntimeError:
+    pass
+
 
 def get_dist_dict_multithreaded(tup):
-    (i, model_path) = tup
+    (i, model_path, compare_to, align_to, vocab) = tup
     if i == 0 and compare_to == "first":
         return None
     elif i == len(model_paths) - 1 and compare_to == "last":
@@ -56,23 +61,23 @@ def get_dist_dict(model_path, alignment_reference_model_path, comparison_referen
     return dist_dict
 
 
-# def get_z_score_dict(dist_dict):
-#     """
-#     Convert the dictionary of distance scores for a given timestep into a dictionary of z-scores
-#     - i.e. how many standard deviations is a given word's distance score from the mean of all word's distance scores at this timestep?
-#     """
-#
-#     # calculate mean and variance of distance scores, ignoring any words for whom the value was None
-#     # -- calculate the mean and variance of the distance scores for all words
-#     # which are represented in both the current timestep's model and the comparison reference model.
-#     mean = np.mean(list(dist_dict.values()))
-#     var = np.var(list(dist_dict.values()))
-#
-#     z_score_dict = {}
-#     for word in dist_dict:
-#         z_score_dict[word] = (dist_dict[word] - mean) / np.sqrt(var)
-#
-#     return z_score_dict
+def get_z_score_dict(dist_dict):
+    """
+    Convert the dictionary of distance scores for a given timestep into a dictionary of z-scores
+    - i.e. how many standard deviations is a given word's distance score from the mean of all word's distance scores at this timestep?
+    """
+
+    # calculate mean and variance of distance scores, ignoring any words for whom the value was None
+    # -- calculate the mean and variance of the distance scores for all words
+    # which are represented in both the current timestep's model and the comparison reference model.
+    mean = np.mean(list(dist_dict.values()))
+    var = np.var(list(dist_dict.values()))
+
+    z_score_dict = {}
+    for word in dist_dict:
+        z_score_dict[word] = (dist_dict[word] - mean) / np.sqrt(var)
+
+    return z_score_dict
 
 
 def compute_mean_shift(time_series_dict, j, compare_to):
@@ -174,10 +179,10 @@ def detect_change_point(word, z_scores_dict, n_samples, p_value_threshold, gamma
 
 
 def get_word_change_point(tup):
-    (word, dists_dict) = tup
+    (word, dists_dict, n_samples, p_value_threshold, gamma_threshold, compare_to) = tup
 
-    change_point = detect_change_point(word, dists_dict, options.n_samples, options.p_value_threshold,
-                                       options.gamma_threshold, options.compare_to)
+    change_point = detect_change_point(word, dists_dict, n_samples, p_value_threshold,
+                                       gamma_threshold, compare_to)
 
     if change_point:
         return change_point
@@ -211,13 +216,17 @@ if __name__ == '__main__':
                         help="Number of samples to draw for permutation test")
     parser.add_argument("-p", "--p_value_threshold", type=float, default=0.05, help="P-value cut-off")
     parser.add_argument("-g", "--gamma_threshold", type=float, default=0, help="Minimum z-score magnitude.")
+    parser.add_argument("-z", "--z_scores", action="store_true", default=True,
+                        help="Include this flag to standardize the distances (i.e. use z-scores). If this flag is not "
+                             "included, the raw cosine or neighbourhood scores will be used without standardization.")
+
     options = parser.parse_args()
 
     start_time = datetime.datetime.now()
     print("Starting at {}".format(start_time))
 
-    align_to = options.align_to
-    compare_to = options.compare_to
+    # align_to = options.align_to
+    # compare_to = options.compare_to
     model_paths = []
     time_slice_labels = []
     timeslices = sorted([ts for ts in os.listdir(options.models_rootdir)])
@@ -261,27 +270,23 @@ if __name__ == '__main__':
         timeslices[0], timeslices[-1], options.align_to, options.compare_to, options.vocab_threshold)
 
     # if os.path.isfile(distances_filepath) and os.path.isfile(zscores_filepath):
-    if os.path.isfile(distances_filepath):
+    if os.path.isfile(distances_filepath) and os.path.isfile(zscores_filepath):
         with open(distances_filepath, 'r', encoding="utf-8") as infile:
             dict_of_dist_dicts = json.load(infile)
-        # with open(zscores_filepath, 'r', encoding="utf-8") as infile:
-        #     dict_of_z_score_dicts = json.load(infile)
+        with open(zscores_filepath, 'r', encoding="utf-8") as infile:
+            dict_of_z_score_dicts = json.load(infile)
         time_slices_used = sorted(list(dict_of_dist_dicts.keys()))
         print("\n\nLIST OF TIME SLICES USED:")
         print(time_slices_used)
 
     else:
-        #print("STOP BEFORE THE DIST DICTS ARE CALCULATED AGAIN")
-        #exit()
+        # print("STOP BEFORE THE DIST DICTS ARE CALCULATED AGAIN")
+        # exit()
 
-        # try:
-        #     set_start_method('spawn')
-        # except RuntimeError:
-        #     pass
-
-        # pool1 = Pool(10)
-        # dist_dicts = pool1.map(get_dist_dict_multithreaded, enumerate(model_paths))
-        dist_dicts = [get_dist_dict_multithreaded(tup) for tup in enumerate(model_paths)]
+        pool1 = Pool(10)
+        inputs = [tup + (options.compare_to, options.align_to, vocab) for tup in enumerate(model_paths)]
+        dist_dicts = pool1.map(get_dist_dict_multithreaded, inputs)
+        # dist_dicts = [get_dist_dict_multithreaded(tup) for tup in enumerate(model_paths)]
 
         dict_of_dist_dicts = {}
         for tup in dist_dicts:
@@ -292,20 +297,44 @@ if __name__ == '__main__':
         print("\n\nLIST OF TIME SLICES USED:")
         print(time_slices_used)
 
+        dict_of_z_score_dicts = {}
+        for t in time_slice_labels:
+            if t in dict_of_dist_dicts:
+                dict_of_z_score_dicts[t] = get_z_score_dict(dict_of_dist_dicts[t])
+
         with open(distances_filepath, 'w', encoding="utf-8") as outfile:
             json.dump(dict_of_dist_dicts, outfile, indent=2)
 
-        # with open(zscores_filepath, 'w') as outfile:
-        #     json.dump(dict_of_z_score_dicts, outfile, indent=2)
+        with open(zscores_filepath, 'w') as outfile:
+            json.dump(dict_of_z_score_dicts, outfile, indent=2)
 
     print("GOT DICTS OF DIST AND Z-SCORE DICTS at {}\n".format(datetime.datetime.now()))
 
-    dict_of_dists_by_word = defaultdict(lambda: defaultdict(list))
-    for word in vocab:
-        for time_slice in dict_of_dist_dicts:
-            if word in dict_of_dist_dicts[time_slice]:
-                dict_of_dists_by_word[word][time_slice].append(dict_of_dist_dicts[time_slice][word])
-    results = [get_word_change_point(x) for x in dict_of_dists_by_word.items()]
+    pool2 = Pool(10)
+    if options.z_scores:
+
+        dict_of_z_scores_by_word = defaultdict(lambda: defaultdict(list))
+        for word in vocab:
+            for time_slice in dict_of_z_score_dicts:
+                if word in dict_of_z_score_dicts[time_slice]:
+                    dict_of_z_scores_by_word[word][time_slice].append(dict_of_z_score_dicts[time_slice][word])
+
+        inputs = [tup + (options.n_samples, options.p_value_threshold, options.gamma_threshold, options.compare_to) for
+                  tup in dict_of_z_scores_by_word.items()]
+        results = pool2.map(get_word_change_point, inputs)
+        # results = [get_word_change_point(x) for x in dict_of_z_scores_by_word.items()]
+
+    else:
+        dict_of_dists_by_word = defaultdict(lambda: defaultdict(list))
+        for word in vocab:
+            for time_slice in dict_of_dist_dicts:
+                if word in dict_of_dist_dicts[time_slice]:
+                    dict_of_dists_by_word[word][time_slice].append(dict_of_dist_dicts[time_slice][word])
+        inputs = [tup + (options.n_samples, options.p_value_threshold, options.gamma_threshold, options.compare_to) for
+                  tup in dict_of_dists_by_word.items()]
+        results = pool2.map(get_word_change_point, inputs)
+
+        # results = [get_word_change_point(x) for x in dict_of_dists_by_word.items()]
 
     print('got {} results'.format(len(results)))
     # columns for tsv file: 0 = word, 1 = timestep, 2 = p-value, 3 = mean-shift, 4 = z_score
@@ -315,10 +344,16 @@ if __name__ == '__main__':
     results = sorted(results, key=lambda x: -x[3])
     results = sorted(results, key=lambda x: x[2])
 
-    outfile_path = options.outfiles_dir + '/time_series_analysis_NOT_standardized_output_f{}_l{}_a{}_c{}_s{}_v{}.tsv'.format(
-        timeslices[0], timeslices[-1], options.align_to, options.compare_to, options.n_samples, options.vocab_threshold)
+    if options.z_scores:
+        outfile_path = options.outfiles_dir + '/time_series_analysis_standardized_output_f{}_l{}_a{}_c{}_s{}_v{}.tsv'.format(
+            timeslices[0], timeslices[-1], options.align_to, options.compare_to, options.n_samples,
+            options.vocab_threshold)
+    else:
+        outfile_path = options.outfiles_dir + '/time_series_analysis_NOT_standardized_output_f{}_l{}_a{}_c{}_s{}_v{}.tsv'.format(
+            timeslices[0], timeslices[-1], options.align_to, options.compare_to, options.n_samples,
+            options.vocab_threshold)
 
-    with open(outfile_path, 'w',encoding="utf-8") as outfile:
+    with open(outfile_path, 'w', encoding="utf-8") as outfile:
         # outfile.write("\t".join(["word", "timestep", "p-value", "mean-shift", "z_score"]) + "\n")
         for (i, item) in enumerate(results):
             word = str(item[0])
@@ -328,8 +363,8 @@ if __name__ == '__main__':
             #     continue
             #
             # # If no target list is are specified, break after options.n_best
-            # if len(targets) == 0 and i > options.n_best:
-            #     break
+            if i > options.n_best:
+                break
 
             # print(i, ":", item)
             outfile.write('\t'.join([str(s) for s in item]) + '\n')
