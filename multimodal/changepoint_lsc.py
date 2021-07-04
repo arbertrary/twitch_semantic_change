@@ -1,5 +1,5 @@
 import argparse
-import multiprocessing
+#import multiprocessing
 import os
 from collections import Counter
 import torch
@@ -8,21 +8,22 @@ import json
 from scipy.spatial.distance import cosine
 
 import twopoint_lsc as tp
+from torch.multiprocessing import Pool, set_start_method
 
 
 def get_dist_dict_multithreaded(tup):
     (i, model_path) = tup
-    if i == 0 and options.compare_to == "first":
+    if i == 0 and compare_to == "first":
         return None
-    elif i == len(model_paths) - 1 and options.compare_to == "last":
+    elif i == len(model_paths) - 1 and compare_to == "last":
         return None
     else:
-        if options.align_to == "first":
+        if align_to == "first":
             alignment_reference_model_path = model_paths[0]
         else:  # align to last
             alignment_reference_model_path = model_paths[-1]
 
-        if options.compare_to == 'first':
+        if compare_to == 'first':
             comparison_reference_model_path = model_paths[0]
         else:  # compare to last
             comparison_reference_model_path = model_paths[-1]
@@ -32,7 +33,7 @@ def get_dist_dict_multithreaded(tup):
         return (i, dist_dict)
 
 
-def get_dist_dict(model_path, alignment_reference_model_path, comparison_reference_model_path):
+def get_dist_dict(model_path, alignment_reference_model_path, comparison_reference_model_path, common_vocab):
     model = torch.load(model_path)
     # alignment_reference_model = torch.load(alignment_reference_model_path)
     comparison_reference_model = torch.load(comparison_reference_model_path)
@@ -45,7 +46,7 @@ def get_dist_dict(model_path, alignment_reference_model_path, comparison_referen
                                                                                     model)
     dist_dict = {}
 
-    for word in vocab:
+    for word in common_vocab:
         if word in intersection_vocab:
             index = intersection_vocab.index(word)
             dist_dict[word] = cosine(comparison_reference_matrix[index], model_matrix[index])
@@ -67,12 +68,14 @@ if __name__ == '__main__':
     parser.add_argument("-o", "--outfiles_dir", type=str,
                         help="Path to file where results will be written")
     options = parser.parse_args()
-
+    align_to = options.align_to
+    compare_to = options.compare_to
     model_paths = []
     time_slice_labels = []
     timeslices = sorted([ts for ts in os.listdir(options.models_rootdir)])
 
-    vocab_filepath = "{}/time_series_vocab_{}pc_{}_to_{}.txt".format(options.models_rootdir, options.vocab_threshold,
+    os.makedirs(options.outfiles_dir, exist_ok=True)
+    vocab_filepath = "{}/time_series_vocab_{}pc_{}_to_{}.txt".format(options.outfiles_dir, options.vocab_threshold,
                                                                      timeslices[0], timeslices[-1])
 
     vocab_counter = Counter()
@@ -89,7 +92,7 @@ if __name__ == '__main__':
     vocab = set([w for w in vocab_counter if vocab_counter[w] >= options.vocab_threshold * 0.01 * n_models])
     del vocab_counter
 
-    with open(vocab_filepath, 'w') as outfile:
+    with open(vocab_filepath, 'w',encoding="utf-8") as outfile:
         for word in vocab:
             outfile.write(word + '\n')
 
@@ -110,18 +113,25 @@ if __name__ == '__main__':
         timeslices[0], timeslices[-1], options.align_to, options.compare_to, options.vocab_threshold)
 
     if os.path.isfile(distances_filepath) and os.path.isfile(zscores_filepath):
-        with open(distances_filepath, 'r') as infile:
+        with open(distances_filepath, 'r',encoding="utf-8") as infile:
             dict_of_dist_dicts = json.load(infile)
-        with open(zscores_filepath, 'r') as infile:
+        with open(zscores_filepath, 'r',encoding="utf-8") as infile:
             dict_of_z_score_dicts = json.load(infile)
         time_slices_used = sorted(list(dict_of_dist_dicts.keys()))
         print("\n\nLIST OF TIME SLICES USED:")
         print(time_slices_used)
 
     else:
+        
+        try:
+                 set_start_method('spawn')
+        except RuntimeError:
+                pass
+            
 
-        pool1 = multiprocessing.Pool(10)
-        dist_dicts = pool1.map(get_dist_dict_multithreaded, enumerate(model_paths))
+        #pool1 = Pool(10)
+        #dist_dicts = pool1.map(get_dist_dict_multithreaded, enumerate(model_paths))
+        dist_dicts = [get_dist_dict_multithreaded(tup) for tup in enumerate(model_paths)]
 
         dict_of_dist_dicts = {}
         for tup in dist_dicts:
@@ -132,8 +142,7 @@ if __name__ == '__main__':
         print("\n\nLIST OF TIME SLICES USED:")
         print(time_slices_used)
 
-        os.makedirs(options.outfiles_dir, exist_ok=True)
-        with open(distances_filepath, 'w') as outfile:
+        with open(distances_filepath, 'w',encoding="utf-8") as outfile:
             json.dump(dict_of_dist_dicts, outfile, indent=2)
 
         # with open(zscores_filepath, 'w') as outfile:
