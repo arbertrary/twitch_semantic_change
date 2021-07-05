@@ -7,6 +7,32 @@ import argparse
 import json
 
 
+def build_vocabulary2(in_path: str, out_path: str, min_count: int, skip_emotes: int):
+    vocab = {}
+    filepath = in_path
+    with open(filepath, "r", encoding="utf-8") as csvfile:
+        reader = DictReader(csvfile, delimiter="\t")
+        for row in reader:
+            message = row["msg"].strip().split()
+            emotenames = row["emotenames"].split()
+
+            for word in message:
+                if skip_emotes == 1 and word in emotenames:
+                    continue
+                if word not in vocab:
+                    vocab[word] = {"emotes": Counter(emotenames), "count": 1}
+                else:
+                    vocab[word]["emotes"].update(emotenames)
+                    vocab[word]["count"] += 1
+
+    c = {x: {"emotes": dct["emotes"], "count": dct["count"]} for x, dct in
+         sorted(vocab.items(), key=lambda y: y[1]["count"], reverse=True) if
+         dct["count"] >= min_count}
+
+    with open(out_path, "w") as outfile:
+        json.dump(OrderedDict(c), outfile, indent=2)
+
+
 def build_vocabulary(in_path: str, out_path: str, min_count: int, skip_emotes: int):
     counter = Counter()
 
@@ -46,6 +72,6 @@ if __name__ == '__main__':
     indir = args.infiles_rootdir
     outdir = args.outdir_path
 
-    build_vocabulary(indir, outdir, args.min, args.skip_emotes)
-    # build_vocabulary("../data/testdata/emote_filtered/filtered_201911031555.txt", "vocab.json", min_count=2,
-    #                  skip_emotes=0)
+    build_vocabulary2(indir, outdir, args.min, args.skip_emotes)
+    # build_vocabulary2("../data/testdata/emote_filtered/filtered_201911031555.txt", "vocab.json", min_count=2,
+    #                   skip_emotes=1)
