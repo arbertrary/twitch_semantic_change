@@ -59,80 +59,55 @@ def load_gensim_model(model_path):
     return m
 
 
+def load_tuple_vocab(vocab_path):
+    with open(vocab_path, "r") as jsonfile:
+        vocab = json.loads(jsonfile.read())
+
+        vocab_tuples = []
+
+        for word_emote_tuple in vocab:
+            split = word_emote_tuple.split("|")
+            word = split[0]
+            emotes = list(split[1:])
+            vocab_tuples.append((word, emotes))
+
+        print(vocab_tuples)
+        return vocab_tuples
+
+
 def load_vocab(vocab_path):
     with open(vocab_path, "r") as jsonfile:
         vocab = json.loads(jsonfile.read())
-        return vocab
+
+        vocab_tuples = []
+        for word in vocab:
+            print(word)
+            emotes = list(vocab[word]["emotes"].keys())
+            vocab_tuples.append((word, emotes))
+
+        print(vocab_tuples)
+        return vocab_tuples
 
 
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description="generating an embedding")
-    parser.add_argument("-e", "--emote_model", type=str, help="Path to the emote word embedding model")
-    parser.add_argument("-w", "--word_model", type=str, help="Path to the word embedding model")
-    parser.add_argument("-v", "--vocab", type=str, help="Path to the multimodal vocabulary")
-    parser.add_argument("-o", "--out_dir", type=str, help="Path to the save location for the autofused tensors")
-    parser.add_argument("-im", "--images", action="store_true", default=False)
-    parser.add_argument("--epochs", type=int, default=10)
-
-    args = vars(parser.parse_args())
-
-    emote_model_path = args["emote_model"]
-    word_model_path = args["word_model"]
-    vocab_path = args["vocab"]
-    out_dir = args["out_dir"]
-    os.makedirs(out_dir, exist_ok=True)
-
-    vocabulary = load_vocab(vocab_path)
-    if args["images"]:
-        emote_model = torch.load(emote_model_path)
-    else:
-        emote_model = load_gensim_model(emote_model_path)
-
-    word_model = load_gensim_model(word_model_path)
-    # Plan:
-    # Embedding vektoren laden, mit
-    # torch.tensor() zu tensor machen
-    # fused vektoren speichern in dictionary
-    # word: tensor
-    device = torch.device(CONFIG["device"])
-    model = AutoFusion(CONFIG, CONFIG["latent_dim"] * 2)
-    model = model.to(device)
-
-    # TODO
-    # Wie mach ich die Epochen? Hier noch ein
-    # for i in range(epochs): drumherum?
-    # Muss dann der output nochmal wieder reingeworfen werden?
-    # Oder gibt's da eh nur einen einzigen Pass?
-    # Den output muss ich dann irgendwo speichern als
-    # {w: output["z"]}
-    # z.B. {"("typeD4_pseudoword_bin2", "LUL")" : [1,2,3,4,5,...]}
-    # Dann kann ich zwischen diesen vektoren die cos-distance berechnen
-    # und dann mal schauen was rauskommt
-
-    # TODO
-    # Cuda/GPU nutzen? Bringt das hier überhaupt was?
-
-    # TODO
-    # logging
-
+def get_input_tensors(word_model, emote_model, vocab):
     inputs = []
-    for word_emote_tuple in vocabulary:
-        # split = make_tuple(word_emote_tuple)
-        split = word_emote_tuple.split("|")
-        word = split[0]
-        emotes = list(split[1:])
+    for word_emote_tuple in vocab:
+        (word, emotes) = word_emote_tuple
+
         if word not in word_model:
-            word_emote_tuple = word_emote_tuple.replace(word, "UNK")
+            word = "UNK"
+            # word_emote_tuple = word_emote_tuple.replace(word, "UNK")
             word_vector = torch.zeros(CONFIG["latent_dim"])
         else:
             word_vector = torch.tensor(word_model[word])
 
-        print("word_vector", len(word_vector))
+        # print("word_vector", len(word_vector))
 
         # for the case of images possibly only this part needs to be changed?
         if len(emotes) == 1:
             if emotes[0] not in emote_model:
-                word_emote_tuple = word_emote_tuple.replace(emotes[0], "UNK_EM")
+                emotes[0] = "UNK_EM"
+                # word_emote_tuple = word_emote_tuple.replace(emotes[0], "UNK_EM")
                 emote_vector = torch.zeros(CONFIG["latent_dim"])
             else:
                 if args["images"]:
@@ -166,9 +141,70 @@ if __name__ == '__main__':
         emote_vector = emote_vector.to(CONFIG["device"])
         input_concat = torch.cat([word_vector, emote_vector])
         input_concat = input_concat.to(CONFIG["device"])
-        print(input_concat.shape)
-        inputs.append((word_emote_tuple, input_concat))
+        # print(input_concat.shape)
 
+        if args["tuples"]:
+            key = "|".join([word] + emotes)
+            inputs.append((key, input_concat))
+        else:
+            inputs.append((word, input_concat))
+
+    return inputs
+
+
+if __name__ == '__main__':
+    # Local testrun command:
+    # python multimodal/fuse.py
+    # --emote_model=data/testdata/testmodels/emote_model/saved_model.gensim
+    # --word_model=data/testdata/testmodels/word_model/saved_model.gensim
+    # --vocab=multimodal/vocab.json
+    # --out_dir=data/testdata/testmodels/
+    # --tuples
+    parser = argparse.ArgumentParser(description="generating an embedding")
+    parser.add_argument("-e", "--emote_model", type=str, help="Path to the emote word embedding model")
+    parser.add_argument("-w", "--word_model", type=str, help="Path to the word embedding model")
+    parser.add_argument("-v", "--vocab", type=str, help="Path to the multimodal vocabulary")
+    parser.add_argument("-o", "--out_dir", type=str, help="Path to the save location for the autofused tensors")
+    parser.add_argument("-im", "--images", action="store_true", default=False)
+    parser.add_argument("-t", "--tuples", action="store_true", default=False)
+    parser.add_argument("--epochs", type=int, default=10)
+
+    args = vars(parser.parse_args())
+
+    emote_model_path = args["emote_model"]
+    word_model_path = args["word_model"]
+    vocab_path = args["vocab"]
+    out_dir = args["out_dir"]
+    os.makedirs(out_dir, exist_ok=True)
+
+    if args["tuples"]:
+        vocabulary = load_tuple_vocab(vocab_path)
+    else:
+        vocabulary = load_vocab(vocab_path)
+
+    if args["images"]:
+        emote_model = torch.load(emote_model_path)
+    else:
+        emote_model = load_gensim_model(emote_model_path)
+
+    word_model = load_gensim_model(word_model_path)
+    # Plan:
+    # Embedding vektoren laden, mit
+    # torch.tensor() zu tensor machen
+    # fused vektoren speichern in dictionary
+    # word: tensor
+    device = torch.device(CONFIG["device"])
+    model = AutoFusion(CONFIG, CONFIG["latent_dim"] * 2)
+    model = model.to(device)
+
+    # TODO
+    # Cuda/GPU nutzen? Bringt das hier überhaupt was?
+
+    # TODO
+    # logging
+
+    vocabulary = load_vocab(vocab_path)
+    inputs = get_input_tensors(word_model, emote_model, vocabulary)
     out_tensors = {}
 
     optimizer = optim.Adam(model.parameters(), CONFIG["lr"])
