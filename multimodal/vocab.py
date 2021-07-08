@@ -25,7 +25,7 @@ def build_vocabulary2(in_path: str, out_path: str, min_count: int, skip_emotes: 
                     vocab[word]["emotes"].update(emotenames)
                     vocab[word]["count"] += 1
 
-    c = {x: {"emotes": dct["emotes"], "count": dct["count"]} for x, dct in
+    c = {x: {"emotes": {k:dct["emotes"][k] for k in dct["emotes"] if dct["emotes"][k] >= min_count}, "count": dct["count"]} for x, dct in
          sorted(vocab.items(), key=lambda y: y[1]["count"], reverse=True) if
          dct["count"] >= min_count}
 
@@ -71,6 +71,7 @@ if __name__ == '__main__':
 
     indir = args.infiles_rootdir
     outdir = args.outdir_path
+    os.makedirs(os.path.dirname(outdir), exist_ok=True)
 
     build_vocabulary2(indir, outdir, args.min, args.skip_emotes)
     # build_vocabulary2("../data/testdata/emote_filtered/filtered_201911031555.txt", "vocab.json", min_count=2,

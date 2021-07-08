@@ -60,7 +60,7 @@ def load_gensim_model(model_path):
 
 
 def load_tuple_vocab(vocab_path):
-    with open(vocab_path, "r") as jsonfile:
+    with open(vocab_path, "r",encoding="utf-8") as jsonfile:
         vocab = json.loads(jsonfile.read())
 
         vocab_tuples = []
@@ -71,21 +71,20 @@ def load_tuple_vocab(vocab_path):
             emotes = list(split[1:])
             vocab_tuples.append((word, emotes))
 
-        print(vocab_tuples)
+        #print(vocab_tuples)
         return vocab_tuples
 
 
-def load_vocab(vocab_path):
+def load_vocab(vocab_path,encoding="utf-8"):
     with open(vocab_path, "r") as jsonfile:
         vocab = json.loads(jsonfile.read())
 
         vocab_tuples = []
         for word in vocab:
-            print(word)
             emotes = list(vocab[word]["emotes"].keys())
             vocab_tuples.append((word, emotes))
 
-        print(vocab_tuples)
+        #print(vocab_tuples)
         return vocab_tuples
 
 
@@ -116,11 +115,13 @@ def get_input_tensors(word_model, emote_model, vocab):
                     emote_vector = torch.tensor(emote_model[emotes[0]])
         else:
             vectors = []
-            for emote in emotes:
+            temp_emotes = emotes
+            for i, emote in enumerate(temp_emotes):
                 if emote in emote_model:
                     vectors.append(emote_model[emote])
                 else:
-                    word_emote_tuple = word_emote_tuple.replace(emote, "UNK_EM")
+                    emotes[i] = "UNK_EM"
+                    #word_emote_tuple = word_emote_tuple.replace(emote, "UNK_EM")
 
             # vectors = [emote_model[emote] for emote in emotes if emote in emote_model]
             if len(vectors) == 1:

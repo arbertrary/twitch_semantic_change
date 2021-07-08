@@ -19,7 +19,7 @@ except RuntimeError:
 
 
 def get_dist_dict_multithreaded(tup):
-    (i, model_path, compare_to, align_to, vocab) = tup
+    (i, model_path, compare_to, align_to, vocab,model_paths) = tup
     if i == 0 and compare_to == "first":
         return None
     elif i == len(model_paths) - 1 and compare_to == "last":
@@ -214,6 +214,7 @@ if __name__ == '__main__':
                         help="Path to file where results will be written")
     parser.add_argument("-s", "--n_samples", type=int, default=100,
                         help="Number of samples to draw for permutation test")
+    parser.add_argument("-n", "--n_best", type=int, default=1000, help="Size of n-best list to store")
     parser.add_argument("-p", "--p_value_threshold", type=float, default=0.05, help="P-value cut-off")
     parser.add_argument("-g", "--gamma_threshold", type=float, default=0, help="Minimum z-score magnitude.")
     parser.add_argument("-z", "--z_scores", action="store_true", default=True,
@@ -283,8 +284,8 @@ if __name__ == '__main__':
         # print("STOP BEFORE THE DIST DICTS ARE CALCULATED AGAIN")
         # exit()
 
-        pool1 = Pool(10)
-        inputs = [tup + (options.compare_to, options.align_to, vocab) for tup in enumerate(model_paths)]
+        pool1 = Pool(12)
+        inputs = [tup + (options.compare_to, options.align_to, vocab,model_paths) for tup in enumerate(model_paths)]
         dist_dicts = pool1.map(get_dist_dict_multithreaded, inputs)
         # dist_dicts = [get_dist_dict_multithreaded(tup) for tup in enumerate(model_paths)]
 
@@ -310,7 +311,7 @@ if __name__ == '__main__':
 
     print("GOT DICTS OF DIST AND Z-SCORE DICTS at {}\n".format(datetime.datetime.now()))
 
-    pool2 = Pool(10)
+    pool2 = Pool(12)
     if options.z_scores:
 
         dict_of_z_scores_by_word = defaultdict(lambda: defaultdict(list))
