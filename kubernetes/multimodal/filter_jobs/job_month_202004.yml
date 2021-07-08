@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: build-vocab-202004
+  name: filter-nonemotes-202004-2cols
   namespace: studbernstetter
   annotations:
     description: "create emote corpus files"
@@ -17,18 +17,17 @@ spec:
           imagePullPolicy: "Always"
           resources:
             limits:
-              cpu: "12"
+              cpu: "6"
               memory: "32Gi"
             requests:
-              cpu: "1"
+              cpu: "4"
               memory: "4Gi"
           command:
             - "python3"
-            - "/home/stud/bernstetter/ma/mainrepo/multimodal/vocab.py"
-            - "--infiles_rootdir=/home/stud/bernstetter/datasets/twitch_multimodal/synthetic/subsampled_70/202004.tsv"
-            - "--outdir_path=/home/stud/bernstetter/datasets/twitch_multimodal/synthetic/vocabs/202004_multimodal_vocab.json"
-            - "--min=100"
-            - "--skip_emotes=0"
+            - "/home/stud/bernstetter/ma/mainrepo/preprocessing/create_corpusfiles.py"
+            - "--infiles_rootdir=/home/stud/bernstetter/datasets/twitch_sampled/5Kx5K/original/202004"
+            - "--outdir_path=/home/stud/bernstetter/datasets/twitch_multimodal/sampled/202004"
+            - "--mode=f"
           volumeMounts:
             - mountPath: /home/stud/bernstetter
               name: home

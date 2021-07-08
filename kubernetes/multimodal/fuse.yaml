@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: fuse-{{ month }}-sg0
+  name: fuse-{{ month }}-sg1
   namespace: studbernstetter
   annotations:
     description: "Fuse vectors of word and emote embeddings"
@@ -25,11 +25,11 @@ spec:
           command:
             - "python3"
             - "/home/stud/bernstetter/ma/mainrepo/multimodal/fuse.py"
-            - "--emote_model=/home/stud/bernstetter/models/twitch_multimodal/emote_embeddings/vec_128_w5_mc500_iter10_sg0/saved_model.gensim" 
-            - "--word_model=/home/stud/bernstetter/models/twitch_multimodal/word_embeddings/{{ month }}/vec_128_w5_mc100_iter10_sg0/saved_model.gensim" 
-            - "--vocab=/home/stud/bernstetter/datasets/twitch_multimodal/synthetic/vocabs/{{ month }}_multimodal_vocab.json"
-            - "--out_dir=/home/stud/bernstetter/models/twitch_multimodal/fused_embeddings/sg0/{{ month }}"
-            - "--epochs=2"
+            - "--emote_model=/home/stud/bernstetter/models/twitch_multimodal/emote_embeddings/vec_128_w5_mc500_iter10_sg1/saved_model.gensim" 
+            - "--word_model=/home/stud/bernstetter/models/twitch_multimodal/sampled_word_embeddings/{{ month }}/vec_128_w5_mc100_iter10_sg1/saved_model.gensim" 
+            - "--vocab=/home/stud/bernstetter/datasets/twitch_multimodal/sampled/vocabs/{{ month }}_multimodal_vocab.json"
+            - "--out_dir=/home/stud/bernstetter/models/twitch_multimodal/sampled_fused_embeddings/sg1/{{ month }}"
+            - "--epochs=10"
           volumeMounts:
             - mountPath: /home/stud/bernstetter
               name: home

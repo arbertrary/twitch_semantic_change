@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: embedding-{{ month }}-sg1
+  name: embedding-{{ month }}-sg0
   namespace: studbernstetter
   annotations:
     description: "creating embeddings"
@@ -25,10 +25,10 @@ spec:
           command:
             - "python3"
             - "/home/stud/bernstetter/ma/mainrepo/multimodal/embeddings.py"
-            - "--input_dir=/home/stud/bernstetter/datasets/twitch_multimodal/synthetic/subsampled_70/{{ month }}.tsv"
-            - "--model_dir=/home/stud/bernstetter/models/twitch_multimodal/word_embeddings/{{ month }}"
+            - "--input_dir=/home/stud/bernstetter/datasets/twitch_multimodal/sampled/concat/{{ month }}_concat.tsv"
+            - "--model_dir=/home/stud/bernstetter/models/twitch_multimodal/sampled_word_embeddings/{{ month }}"
             - "--worker_count=11"
-            - "--skipgram=1"
+            - "--skipgram=0"
             - "--epoch_count=10"
             - "--word_min_count=100"
             - "--vector_size=128"

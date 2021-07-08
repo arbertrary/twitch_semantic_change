@@ -1,10 +1,10 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: embedding-201912-sg1
+  name: filter-nonemotes-{{ month }}-2cols
   namespace: studbernstetter
   annotations:
-    description: "creating embeddings"
+    description: "create emote corpus files"
 spec:
   template:
     spec:
@@ -17,22 +17,17 @@ spec:
           imagePullPolicy: "Always"
           resources:
             limits:
-              cpu: "12"
-              memory: "16Gi"
+              cpu: "6"
+              memory: "32Gi"
             requests:
               cpu: "4"
               memory: "4Gi"
           command:
             - "python3"
-            - "/home/stud/bernstetter/ma/mainrepo/multimodal/embeddings.py"
-            - "--input_dir=/home/stud/bernstetter/datasets/twitch_multimodal/synthetic/subsampled_70/201912.tsv"
-            - "--model_dir=/home/stud/bernstetter/models/twitch_multimodal/word_embeddings/201912"
-            - "--worker_count=11"
-            - "--skipgram=1"
-            - "--epoch_count=10"
-            - "--word_min_count=100"
-            - "--vector_size=128"
-            - "--window_size=5"
+            - "/home/stud/bernstetter/ma/mainrepo/preprocessing/create_corpusfiles.py"
+            - "--infiles_rootdir=/home/stud/bernstetter/datasets/twitch_sampled/5Kx5K/original/{{ month }}"
+            - "--outdir_path=/home/stud/bernstetter/datasets/twitch_multimodal/sampled/{{ month }}"
+            - "--mode=f"
           volumeMounts:
             - mountPath: /home/stud/bernstetter
               name: home
