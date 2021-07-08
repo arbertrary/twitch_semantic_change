@@ -8,6 +8,7 @@ import json
 from ast import literal_eval as make_tuple
 import numpy as np
 import os
+import datetime
 
 CONFIG = {
     "latent_dim": 128,
@@ -60,7 +61,7 @@ def load_gensim_model(model_path):
 
 
 def load_tuple_vocab(vocab_path):
-    with open(vocab_path, "r",encoding="utf-8") as jsonfile:
+    with open(vocab_path, "r", encoding="utf-8") as jsonfile:
         vocab = json.loads(jsonfile.read())
 
         vocab_tuples = []
@@ -71,12 +72,12 @@ def load_tuple_vocab(vocab_path):
             emotes = list(split[1:])
             vocab_tuples.append((word, emotes))
 
-        #print(vocab_tuples)
+        # print(vocab_tuples)
         return vocab_tuples
 
 
-def load_vocab(vocab_path,encoding="utf-8"):
-    with open(vocab_path, "r") as jsonfile:
+def load_vocab(vocab_path):
+    with open(vocab_path, "r", encoding="utf-8") as jsonfile:
         vocab = json.loads(jsonfile.read())
 
         vocab_tuples = []
@@ -84,7 +85,6 @@ def load_vocab(vocab_path,encoding="utf-8"):
             emotes = list(vocab[word]["emotes"].keys())
             vocab_tuples.append((word, emotes))
 
-        #print(vocab_tuples)
         return vocab_tuples
 
 
@@ -99,8 +99,6 @@ def get_input_tensors(word_model, emote_model, vocab):
             word_vector = torch.zeros(CONFIG["latent_dim"])
         else:
             word_vector = torch.tensor(word_model[word])
-
-        # print("word_vector", len(word_vector))
 
         # for the case of images possibly only this part needs to be changed?
         if len(emotes) == 1:
@@ -121,7 +119,7 @@ def get_input_tensors(word_model, emote_model, vocab):
                     vectors.append(emote_model[emote])
                 else:
                     emotes[i] = "UNK_EM"
-                    #word_emote_tuple = word_emote_tuple.replace(emote, "UNK_EM")
+                    # word_emote_tuple = word_emote_tuple.replace(emote, "UNK_EM")
 
             # vectors = [emote_model[emote] for emote in emotes if emote in emote_model]
             if len(vectors) == 1:
@@ -172,6 +170,9 @@ if __name__ == '__main__':
 
     args = vars(parser.parse_args())
 
+    start_time = datetime.datetime.now()
+    print("Starting at {}".format(start_time))
+
     emote_model_path = args["emote_model"]
     word_model_path = args["word_model"]
     vocab_path = args["vocab"]
@@ -189,24 +190,19 @@ if __name__ == '__main__':
         emote_model = load_gensim_model(emote_model_path)
 
     word_model = load_gensim_model(word_model_path)
-    # Plan:
-    # Embedding vektoren laden, mit
-    # torch.tensor() zu tensor machen
-    # fused vektoren speichern in dictionary
-    # word: tensor
     device = torch.device(CONFIG["device"])
     model = AutoFusion(CONFIG, CONFIG["latent_dim"] * 2)
     model = model.to(device)
 
-    # TODO
-    # Cuda/GPU nutzen? Bringt das hier überhaupt was?
+    print("\nGot models and vocab at {}".format(datetime.datetime.now()))
 
     # TODO
     # logging
 
-    vocabulary = load_vocab(vocab_path)
     inputs = get_input_tensors(word_model, emote_model, vocabulary)
     out_tensors = {}
+
+    print("\nGot inputs at {}".format(datetime.datetime.now()))
 
     optimizer = optim.Adam(model.parameters(), CONFIG["lr"])
     for epoch in range(args["epochs"]):
@@ -222,6 +218,7 @@ if __name__ == '__main__':
             optimizer.step()
             epoch_loss.append(output["loss"].item())
 
+        print("\nEpoch {} done at {}".format(epoch, datetime.datetime.now()))
         print(np.mean(epoch_loss))
 
     torch.save(out_tensors, os.path.join(out_dir, "fused_vectors.pt"))
