@@ -136,10 +136,10 @@ def get_input_tensors(word_model, emote_model, vocab):
                 else:
                     emote_vector = torch.tensor(np.mean(vectors, axis=0))
 
-        word_vector = word_vector.to(CONFIG["device"])
-        emote_vector = emote_vector.to(CONFIG["device"])
+        word_vector = word_vector.to(CONFIG["device"], non_blocking=True)
+        emote_vector = emote_vector.to(CONFIG["device"], non_blocking=True)
         input_concat = torch.cat([word_vector, emote_vector])
-        input_concat = input_concat.to(CONFIG["device"])
+        input_concat = input_concat.to(CONFIG["device"],non_blocking=True)
         # print(input_concat.shape)
 
         if args["tuples"]:
@@ -184,17 +184,22 @@ if __name__ == '__main__':
     else:
         vocabulary = load_vocab(vocab_path)
 
+    print("\nGot vocab at {}".format(datetime.datetime.now()))
+
     if args["images"]:
         emote_model = torch.load(emote_model_path)
     else:
         emote_model = load_gensim_model(emote_model_path)
 
     word_model = load_gensim_model(word_model_path)
+    
+    print("\nLoaded models at {}".format(datetime.datetime.now()))
+    
     device = torch.device(CONFIG["device"])
     model = AutoFusion(CONFIG, CONFIG["latent_dim"] * 2)
     model = model.to(device)
+    model.train()
 
-    print("\nGot models and vocab at {}".format(datetime.datetime.now()))
 
     # TODO
     # logging
@@ -208,7 +213,6 @@ if __name__ == '__main__':
     for epoch in range(args["epochs"]):
         epoch_loss = []
         for w, tensor in inputs:
-            optimizer.zero_grad()
             output = model(tensor)
 
             out_tensors[w] = output["z"]
@@ -217,6 +221,7 @@ if __name__ == '__main__':
             loss.backward()
             optimizer.step()
             epoch_loss.append(output["loss"].item())
+            optimizer.zero_grad()
 
         print("\nEpoch {} done at {}".format(epoch, datetime.datetime.now()))
         print(np.mean(epoch_loss))
