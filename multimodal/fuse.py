@@ -5,16 +5,12 @@ import torch
 from torch import optim
 from torch import nn
 import json
-from ast import literal_eval as make_tuple
 import numpy as np
 import os
 import datetime
 
-CONFIG = {
-    "latent_dim": 128,
-    "lr": 1e-3,
-    "device": "cuda:0" if torch.cuda.is_available() else "cpu"  # gpu_id ('x' => multiGPU)
-}
+from torch.utils.data import DataLoader
+from fuse_utils import CONFIG, FuseDataset
 
 
 class AutoFusion(nn.Module):
@@ -139,7 +135,7 @@ def get_input_tensors(word_model, emote_model, vocab):
         word_vector = word_vector.to(CONFIG["device"], non_blocking=True)
         emote_vector = emote_vector.to(CONFIG["device"], non_blocking=True)
         input_concat = torch.cat([word_vector, emote_vector])
-        input_concat = input_concat.to(CONFIG["device"],non_blocking=True)
+        input_concat = input_concat.to(CONFIG["device"], non_blocking=True)
         # print(input_concat.shape)
 
         if args["tuples"]:
@@ -192,19 +188,25 @@ if __name__ == '__main__':
         emote_model = load_gensim_model(emote_model_path)
 
     word_model = load_gensim_model(word_model_path)
-    
+
     print("\nLoaded models at {}".format(datetime.datetime.now()))
-    
+
     device = torch.device(CONFIG["device"])
     model = AutoFusion(CONFIG, CONFIG["latent_dim"] * 2)
     model = model.to(device)
     model.train()
 
-
     # TODO
     # logging
 
-    inputs = get_input_tensors(word_model, emote_model, vocabulary)
+    # inputs = get_input_tensors(word_model, emote_model, vocabulary)
+    inputs = FuseDataset(word_model=word_model, emote_model=emote_model, vocab=vocabulary, images=args["images"],
+                         tuples=args["tuples"])
+    for idx, sample in enumerate(inputs):
+        print(idx)
+
+    dataloader = DataLoader(inputs, batch_size=10, shuffle=True, num_workers=4)
+
     out_tensors = {}
 
     print("\nGot inputs at {}".format(datetime.datetime.now()))
@@ -212,7 +214,9 @@ if __name__ == '__main__':
     optimizer = optim.Adam(model.parameters(), CONFIG["lr"])
     for epoch in range(args["epochs"]):
         epoch_loss = []
-        for w, tensor in inputs:
+        # for w, tensor in inputs:
+        for i_batch, (w, tensor) in enumerate(dataloader):
+            # print(w, tensor)
             output = model(tensor)
 
             out_tensors[w] = output["z"]
@@ -227,3 +231,7 @@ if __name__ == '__main__':
         print(np.mean(epoch_loss))
 
     torch.save(out_tensors, os.path.join(out_dir, "fused_vectors.pt"))
+
+    print("\nSaving done at {}".format(datetime.datetime.now()))
+    end_time = datetime.datetime.now()
+    print("\nExecution took {} Seconds".format((end_time - start_time).total_seconds()))
