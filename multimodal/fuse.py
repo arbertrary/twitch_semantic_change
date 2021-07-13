@@ -4,13 +4,100 @@ import gensim.models
 import torch
 from torch import optim
 from torch import nn
+from torch.utils.data import Dataset, DataLoader
 import json
 import numpy as np
 import os
 import datetime
 
-from torch.utils.data import DataLoader
-from fuse_utils import CONFIG, FuseDataset
+from torch.multiprocessing import Pool, set_start_method
+
+try:
+        set_start_method('spawn')
+except RuntimeError:
+        pass
+
+
+
+class FuseDataset(Dataset):
+    def __init__(self, word_model, emote_model, vocab, images: bool, tuples: bool,config):
+        """
+        Args:
+        """
+        self.word_model = word_model
+        self.emote_model = emote_model
+        self.vocab = vocab
+        self.tuples = tuples
+        self.images = images
+        self.config = config
+
+    def __len__(self):
+        return len(self.vocab)
+
+    def __getitem__(self, idx):
+        (word, emotes) = self.vocab[idx]
+
+        if word not in self.word_model:
+            word = "UNK"
+            # word_emote_tuple = word_emote_tuple.replace(word, "UNK")
+            word_vector = torch.zeros(self.config["latent_dim"])
+        else:
+            word_vector = torch.tensor(self.word_model[word])
+
+        # for the case of images possibly only this part needs to be changed?
+        if len(emotes) == 1:
+            if emotes[0] not in self.emote_model:
+                emotes[0] = "UNK_EM"
+                # word_emote_tuple = word_emote_tuple.replace(emotes[0], "UNK_EM")
+                emote_vector = torch.zeros(self.config["latent_dim"])
+            else:
+                if self.images:
+                    emote_vector = self.emote_model[emotes[0]]
+                else:
+                    emote_vector = torch.tensor(self.emote_model[emotes[0]])
+        else:
+            vectors = []
+            temp_emotes = emotes
+            for i, emote in enumerate(temp_emotes):
+                if emote in self.emote_model:
+                    vectors.append(self.emote_model[emote])
+                else:
+                    emotes[i] = "UNK_EM"
+                    # word_emote_tuple = word_emote_tuple.replace(emote, "UNK_EM")
+
+            # vectors = [emote_model[emote] for emote in emotes if emote in emote_model]
+            if len(vectors) == 1:
+                if self.images:
+                    emote_vector = vectors[0]
+                else:
+                    emote_vector = torch.tensor(vectors[0])
+            elif len(vectors) == 0:
+                emote_vector = torch.zeros(self.config["latent_dim"])
+            else:
+                if self.images:
+                    stacked = torch.stack(vectors)
+                    emote_vector = torch.mean(stacked, dim=0)
+                else:
+                    emote_vector = torch.tensor(np.mean(vectors, axis=0))
+
+        word_vector = word_vector.to(self.config["device"], non_blocking=True)
+        emote_vector = emote_vector.to(self.config["device"], non_blocking=True)
+        input_concat = torch.cat([word_vector, emote_vector])
+        input_concat = input_concat.to(self.config["device"], non_blocking=True)
+        # print(input_concat.shape)
+
+        if self.tuples:
+            key = "|".join([word] + emotes)
+            sample = {key: input_concat}
+            # inputs.append((key, input_concat))
+        else:
+            key = word
+            sample = {word: input_concat}
+            # inputs.append((word, input_concat))
+
+        # print(sample)
+
+        return key, input_concat
 
 
 class AutoFusion(nn.Module):
@@ -28,11 +115,11 @@ class AutoFusion(nn.Module):
         self.fuse_in = nn.Sequential(
             nn.Linear(input_features, input_features // 2),
             nn.Tanh(),
-            nn.Linear(input_features // 2, config['latent_dim']),
+            nn.Linear(input_features // 2, self.config['latent_dim']),
             nn.ReLU()
         )
         self.fuse_out = nn.Sequential(
-            nn.Linear(config['latent_dim'], input_features // 2),
+            nn.Linear(self.config['latent_dim'], input_features // 2),
             nn.ReLU(),
             nn.Linear(input_features // 2, input_features)
         )
@@ -84,71 +171,7 @@ def load_vocab(vocab_path):
         return vocab_tuples
 
 
-def get_input_tensors(word_model, emote_model, vocab):
-    inputs = []
-    for word_emote_tuple in vocab:
-        (word, emotes) = word_emote_tuple
-
-        if word not in word_model:
-            word = "UNK"
-            # word_emote_tuple = word_emote_tuple.replace(word, "UNK")
-            word_vector = torch.zeros(CONFIG["latent_dim"])
-        else:
-            word_vector = torch.tensor(word_model[word])
-
-        # for the case of images possibly only this part needs to be changed?
-        if len(emotes) == 1:
-            if emotes[0] not in emote_model:
-                emotes[0] = "UNK_EM"
-                # word_emote_tuple = word_emote_tuple.replace(emotes[0], "UNK_EM")
-                emote_vector = torch.zeros(CONFIG["latent_dim"])
-            else:
-                if args["images"]:
-                    emote_vector = emote_model[emotes[0]]
-                else:
-                    emote_vector = torch.tensor(emote_model[emotes[0]])
-        else:
-            vectors = []
-            temp_emotes = emotes
-            for i, emote in enumerate(temp_emotes):
-                if emote in emote_model:
-                    vectors.append(emote_model[emote])
-                else:
-                    emotes[i] = "UNK_EM"
-                    # word_emote_tuple = word_emote_tuple.replace(emote, "UNK_EM")
-
-            # vectors = [emote_model[emote] for emote in emotes if emote in emote_model]
-            if len(vectors) == 1:
-                if args["images"]:
-                    emote_vector = vectors[0]
-                else:
-                    emote_vector = torch.tensor(vectors[0])
-            elif len(vectors) == 0:
-                emote_vector = torch.zeros(CONFIG["latent_dim"])
-            else:
-                if args["images"]:
-                    stacked = torch.stack(vectors)
-                    emote_vector = torch.mean(stacked, dim=0)
-                else:
-                    emote_vector = torch.tensor(np.mean(vectors, axis=0))
-
-        word_vector = word_vector.to(CONFIG["device"], non_blocking=True)
-        emote_vector = emote_vector.to(CONFIG["device"], non_blocking=True)
-        input_concat = torch.cat([word_vector, emote_vector])
-        input_concat = input_concat.to(CONFIG["device"], non_blocking=True)
-        # print(input_concat.shape)
-
-        if args["tuples"]:
-            key = "|".join([word] + emotes)
-            inputs.append((key, input_concat))
-        else:
-            inputs.append((word, input_concat))
-
-    return inputs
-
-
 if __name__ == '__main__':
-    # Local testrun command:
     # python multimodal/fuse.py
     # --emote_model=data/testdata/testmodels/emote_model/saved_model.gensim
     # --word_model=data/testdata/testmodels/word_model/saved_model.gensim
@@ -163,8 +186,17 @@ if __name__ == '__main__':
     parser.add_argument("-im", "--images", action="store_true", default=False)
     parser.add_argument("-t", "--tuples", action="store_true", default=False)
     parser.add_argument("--epochs", type=int, default=10)
+    parser.add_argument("--cpu", action="store_true", default=True)
+    parser.add_argument("--gpu", action="store_true", default=False)
 
     args = vars(parser.parse_args())
+    CONFIG = {
+        "latent_dim": 128,
+        "lr": 1e-3,
+        "device": "cuda:0" if args["gpu"] else "cpu"  # gpu_id ('x' => multiGPU)
+    }
+    print("CONFIG:")
+    print(CONFIG)
 
     start_time = datetime.datetime.now()
     print("Starting at {}".format(start_time))
@@ -201,11 +233,9 @@ if __name__ == '__main__':
 
     # inputs = get_input_tensors(word_model, emote_model, vocabulary)
     inputs = FuseDataset(word_model=word_model, emote_model=emote_model, vocab=vocabulary, images=args["images"],
-                         tuples=args["tuples"])
-    for idx, sample in enumerate(inputs):
-        print(idx)
+                         tuples=args["tuples"],config=CONFIG)
 
-    dataloader = DataLoader(inputs, batch_size=10, shuffle=True, num_workers=4)
+    dataloader = DataLoader(inputs, batch_size=512, shuffle=True, num_workers=6)
 
     out_tensors = {}
 
