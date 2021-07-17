@@ -73,6 +73,6 @@ if __name__ == '__main__':
     outdir = args.outdir_path
     os.makedirs(os.path.dirname(outdir), exist_ok=True)
 
-    build_vocabulary2(indir, outdir, args.min, args.skip_emotes)
+    build_vocabulary(indir, outdir, args.min, args.skip_emotes)
     # build_vocabulary2("../data/testdata/emote_filtered/filtered_201911031555.txt", "vocab.json", min_count=2,
     #                   skip_emotes=1)

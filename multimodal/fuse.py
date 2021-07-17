@@ -20,14 +20,14 @@ except RuntimeError:
 
 
 class FuseDataset(Dataset):
-    def __init__(self, word_model, emote_model, vocab, images: bool, tuples: bool,config):
+    def __init__(self, word_model, emote_model, vocab, images: bool, local_vocab: bool, config):
         """
         Args:
         """
         self.word_model = word_model
         self.emote_model = emote_model
         self.vocab = vocab
-        self.tuples = tuples
+        self.local_vocab = local_vocab
         self.images = images
         self.config = config
 
@@ -86,7 +86,7 @@ class FuseDataset(Dataset):
         input_concat = input_concat.to(self.config["device"], non_blocking=True)
         # print(input_concat.shape)
 
-        if self.tuples:
+        if self.local_vocab:
             key = "|".join([word] + emotes)
             sample = {key: input_concat}
             # inputs.append((key, input_concat))
@@ -143,7 +143,7 @@ def load_gensim_model(model_path):
     return m
 
 
-def load_tuple_vocab(vocab_path):
+def load_local_vocab(vocab_path):
     with open(vocab_path, "r", encoding="utf-8") as jsonfile:
         vocab = json.loads(jsonfile.read())
 
@@ -184,7 +184,7 @@ if __name__ == '__main__':
     parser.add_argument("-v", "--vocab", type=str, help="Path to the multimodal vocabulary")
     parser.add_argument("-o", "--out_dir", type=str, help="Path to the save location for the autofused tensors")
     parser.add_argument("-im", "--images", action="store_true", default=False)
-    parser.add_argument("-t", "--tuples", action="store_true", default=False)
+    parser.add_argument("--local_vocab", action="store_true", default=False)
     parser.add_argument("--epochs", type=int, default=10)
     parser.add_argument("--cpu", action="store_true", default=True)
     parser.add_argument("--gpu", action="store_true", default=False)
@@ -207,8 +207,8 @@ if __name__ == '__main__':
     out_dir = args["out_dir"]
     os.makedirs(out_dir, exist_ok=True)
 
-    if args["tuples"]:
-        vocabulary = load_tuple_vocab(vocab_path)
+    if args["local_vocab"]:
+        vocabulary = load_local_vocab(vocab_path)
     else:
         vocabulary = load_vocab(vocab_path)
 
@@ -233,7 +233,7 @@ if __name__ == '__main__':
 
     # inputs = get_input_tensors(word_model, emote_model, vocabulary)
     inputs = FuseDataset(word_model=word_model, emote_model=emote_model, vocab=vocabulary, images=args["images"],
-                         tuples=args["tuples"],config=CONFIG)
+                         local_vocab=args["local_vocab"],config=CONFIG)
 
     dataloader = DataLoader(inputs, batch_size=512, shuffle=True, num_workers=6)
 
@@ -243,25 +243,30 @@ if __name__ == '__main__':
 
     optimizer = optim.Adam(model.parameters(), CONFIG["lr"])
     for epoch in range(args["epochs"]):
-        epoch_loss = []
+        epoch_losses = []
         # for w, tensor in inputs:
         for i_batch, (w, tensor) in enumerate(dataloader):
             # print(w, tensor)
             output = model(tensor)
+            
+            if epoch == args["epochs"] - 1:
+                for i, word in enumerate(w):
+                    out_tensors[word] = output["z"][i]
 
-            out_tensors[w] = output["z"]
             loss = output["loss"]
 
             loss.backward()
             optimizer.step()
-            epoch_loss.append(output["loss"].item())
+            epoch_losses.append(output["loss"].item())
             optimizer.zero_grad()
 
         print("\nEpoch {} done at {}".format(epoch, datetime.datetime.now()))
-        print(np.mean(epoch_loss))
+
+        epoch_loss = np.mean(epoch_losses)
+        print(epoch_loss)
 
     torch.save(out_tensors, os.path.join(out_dir, "fused_vectors.pt"))
-
+    
     print("\nSaving done at {}".format(datetime.datetime.now()))
     end_time = datetime.datetime.now()
     print("\nExecution took {} Seconds".format((end_time - start_time).total_seconds()))

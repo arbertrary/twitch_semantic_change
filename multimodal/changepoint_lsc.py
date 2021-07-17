@@ -204,17 +204,16 @@ if __name__ == '__main__':
     parser.add_argument("--models_rootdir", type=str,
                         help="path to first embedding model")
     parser.add_argument("-a", "--align_to", type=str, default="first",
-                        help="which model to align every other model to: 'first', 'last', or 'previous'")
+                        help="which model to align every other model to: 'first', or 'last'")
     parser.add_argument("-c", "--compare_to", type=str, default="first",
-                        help="which model's vector to compare every other model's vector to: 'first', 'last', or 'previous'")
+                        help="which model's vector to compare every other model's vector to: 'first' or 'last'")
     parser.add_argument("-v", "--vocab_threshold", type=int, default=75,
                         help="percent of models which must contain word in order for it to be included")
-    parser.add_argument("-t", "--t_best", type=int, default=1000, help="Number of top-ranked words to output")
     parser.add_argument("-o", "--outfiles_dir", type=str,
                         help="Path to file where results will be written")
-    parser.add_argument("-s", "--n_samples", type=int, default=100,
+    parser.add_argument("-s", "--n_samples", type=int, default=1000,
                         help="Number of samples to draw for permutation test")
-    parser.add_argument("-n", "--n_best", type=int, default=1000, help="Size of n-best list to store")
+    parser.add_argument("-n", "--n_best", type=int, default=200, help="Size of n-best list to store")
     parser.add_argument("-p", "--p_value_threshold", type=float, default=0.05, help="P-value cut-off")
     parser.add_argument("-g", "--gamma_threshold", type=float, default=0, help="Minimum z-score magnitude.")
     parser.add_argument("-z", "--z_scores", action="store_true", default=True,
@@ -246,7 +245,6 @@ if __name__ == '__main__':
         vocab_counter.update(model.keys())
 
     n_models = len(model_paths)
-    print(vocab_counter.most_common(10))
     vocab = set([w for w in vocab_counter if vocab_counter[w] >= options.vocab_threshold * 0.01 * n_models])
     del vocab_counter
 

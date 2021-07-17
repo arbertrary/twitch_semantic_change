@@ -28,9 +28,8 @@ def get_image_tensors(in_dir, model):
         input_batch = input_tensor.unsqueeze(0)  # create a mini-batch as expected by the model
 
         # move the input and model to GPU for speed if available
-        if torch.cuda.is_available():
-            input_batch = input_batch.to('cuda:0')
-            model.to('cuda:0')
+        input_batch = input_batch.to('cpu')
+        model.to('cpu')
 
         with torch.no_grad():
             output = model(input_batch)
