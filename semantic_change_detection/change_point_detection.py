@@ -441,7 +441,7 @@ if __name__ == "__main__":
 
     else:
 
-        pool1 = multiprocessing.Pool(10)
+        pool1 = multiprocessing.Pool(12)
 
         dist_dicts = pool1.map(get_dist_dict_multithreaded, enumerate(model_paths))
 
@@ -472,7 +472,7 @@ if __name__ == "__main__":
     # Finally, we do the change-point analysis on each word's z-score (or dist) time-series. We keep a ranked list of
     # the n 'best' change-points detected, and print it when we're done.
 
-    pool2 = multiprocessing.Pool(10)
+    pool2 = multiprocessing.Pool(12)
 
     if options.z_scores:
 

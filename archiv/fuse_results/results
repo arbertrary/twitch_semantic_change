@@ -1,0 +1,108 @@
+# /sg0_30ep/global_vocab/
+# AVG Prec at 50
+AP @ 50: 0.039
+Total # of pseudowords @ 50: 11
+####
+
+# /sg0_50ep/global_vocab/
+# AVG Prec at 50
+AP @ 50: 0.095
+Total # of pseudowords @ 50: 10
+####
+
+# /sg0/global_vocab/
+# AVG Prec at 50
+AP @ 50: 0.050
+Total # of pseudowords @ 50: 15
+####
+
+# /sg0/global_vocab_noemotes/
+# AVG Prec at 50
+AP @ 50: 0.041
+Total # of pseudowords @ 50: 10
+####
+
+# /sg0_images/global_vocab/
+# AVG Prec at 50
+AP @ 50: 0.002
+Total # of pseudowords @ 50: 3
+####
+
+# /sg0_images/global_vocab_noemotes/
+# AVG Prec at 50
+AP @ 50: 0.004
+Total # of pseudowords @ 50: 4
+####
+
+# /sg0_images/local_vocab/
+# AVG Prec at 50
+AP @ 50: 0.001
+Total # of pseudowords @ 50: 2
+####
+
+# /sg0_images/local_vocab_noemotes/
+# AVG Prec at 50
+AP @ 50: 0.003
+Total # of pseudowords @ 50: 3
+####
+
+# /sg0/local_vocab/
+# AVG Prec at 50
+AP @ 50: 0.028
+Total # of pseudowords @ 50: 4
+####
+
+# /sg0/local_vocab_noemotes/
+# AVG Prec at 50
+AP @ 50: 0.054
+Total # of pseudowords @ 50: 8
+####
+
+# /sg1/global_vocab/
+# AVG Prec at 50
+AP @ 50: 0.014
+Total # of pseudowords @ 50: 7
+####
+
+# /sg1/global_vocab_noemotes/
+# AVG Prec at 50
+AP @ 50: 0.021
+Total # of pseudowords @ 50: 8
+####
+
+# /sg1_images/global_vocab/
+# AVG Prec at 50
+AP @ 50: 0.007
+Total # of pseudowords @ 50: 5
+####
+
+# /sg1_images/global_vocab_noemotes/
+# AVG Prec at 50
+AP @ 50: 0.001
+Total # of pseudowords @ 50: 6
+####
+
+# /sg1_images/local_vocab/
+# AVG Prec at 50
+AP @ 50: 0.001
+Total # of pseudowords @ 50: 1
+####
+
+# /sg1_images/local_vocab_noemotes/
+# AVG Prec at 50
+AP @ 50: 0.002
+Total # of pseudowords @ 50: 2
+####
+
+# /sg1/local_vocab/
+# AVG Prec at 50
+AP @ 50: 0.002
+Total # of pseudowords @ 50: 3
+####
+
+# /sg1/local_vocab_noemotes/
+# AVG Prec at 50
+AP @ 50: 0.012
+Total # of pseudowords @ 50: 7
+####
+

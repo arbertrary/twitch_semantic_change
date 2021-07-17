@@ -65,7 +65,8 @@ if __name__ == "__main__":
 
             for line in infile:
                 k_retrieved += 1
-                word = line.strip().split('\t')[options.word_column]
+                # Splitting with | introduced on 15.07.21 because of multimodal local vocab
+                word = line.strip().split('\t')[options.word_column].split("|")[0]
                 if word in d:
                     pseudoword_type = d[word]['type']
                     freq_bin = word[9]

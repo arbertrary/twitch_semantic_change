@@ -24,7 +24,7 @@ spec:
               memory: "4Gi"
           command:
             - "python3"
-            - "/home/stud/bernstetter/ma/initial/evaluation/evaluate_synthetic_data_results.py"
+            - "/home/stud/bernstetter/ma/mainrepo/evaluation/evaluate_synthetic_data_results.py"
             - "--results_dir=/home/stud/bernstetter/models/synthetic_twitch/60s_grouped_results/changepoint/sg1/"
             - "--results_fn=time_series_analysis_standardized_output_f201905_l202004_alast_clast_mcosine_k25_s1000_p0.05_g0_v50.tsv"
             - "--word_column=0"

@@ -23,9 +23,11 @@ def filter_non_emote_messages_to_tsv(in_filepath):
     df.dropna(subset=["emotes", "extemotes"], how="all", inplace=True)
 
     filename = "filtered_" + os.path.basename(in_filepath).replace(".csv", ".tsv")
-    df["emotenames"] = df.apply(
-        lambda row: get_emotes_in_msg_for_df(row["msg"],
-                                             str(row["emotes"]) + "/" + str(row["extemotes"])), axis=1)
+    try:
+        df["emotenames"] = df.apply(lambda row: get_emotes_in_msg_for_df(row["msg"], str(row["emotes"]) + "/" + str(row["extemotes"])), axis=1)
+    except ValueError as e:
+        print(e)
+        return
     out_filepath = os.path.join(out_path, filename)
 
     df[["msg", "emotenames"]].to_csv(out_filepath, index=False, sep="\t")
@@ -125,7 +127,7 @@ if __name__ == '__main__':
     out_path = options.outdir_path
     os.makedirs(out_path, exist_ok=True)
 
-    pool = multiprocessing.Pool(11)
+    pool = multiprocessing.Pool(5)
     filelist = [os.path.join(in_path, file) for file in os.listdir(in_path)]
 
     if options.mode == "g":

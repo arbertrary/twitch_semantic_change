@@ -8,7 +8,9 @@ def read_ap_at_50(filepath):
         reader = csv.DictReader(csvfile, delimiter="\t")
         for row in reader:
             if row["k_retrieved"] == "50":
-                print(row["average_precision"])
+                print("AP @ 50: {:0.3f}".format(float(row["average_precision"])))
+                print("Total # of pseudowords @ 50: {}".format(50 - int(row["n_non_pseudowords"])))
+
 
 
 if __name__ == '__main__':
