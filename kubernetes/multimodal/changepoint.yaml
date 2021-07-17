@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: changepoint-test
+  name: changepoint-sg0-global-noemotes
   namespace: studbernstetter
   annotations:
     description: "detect change"
@@ -25,9 +25,8 @@ spec:
           command:
             - "python3"
             - "/home/stud/bernstetter/ma/mainrepo/multimodal/changepoint_lsc.py"
-            - "--models_rootdir=/home/stud/bernstetter/models/twitch_multimodal/sampled_fused_embeddings/sg1"
-            - "--outfiles_dir=/home/stud/bernstetter/models/twitch_multimodal/results/changepoint/sampled/"
-            - "--vocab_threshold=50"
+            - "--models_rootdir=/home/stud/bernstetter/models/twitch_multimodal/synth_fused_embeddings/sg0/global_vocab_noemotes"
+            - "--outfiles_dir=/home/stud/bernstetter/models/twitch_multimodal/synth_results/changepoint/sg0/global_vocab_noemotes/"
             - "--align_to=last"
             - "--compare_to=last"
           volumeMounts:

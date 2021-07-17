@@ -1,35 +1,37 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: fuse-{{ month }}-sg1
+  name: fuse-{{ month }}-sg0-30ep
   namespace: studbernstetter
   annotations:
     description: "Fuse vectors of word and emote embeddings"
 spec:
+        #backoffLimit: 0
   template:
     spec:
-      priorityClassName: research-med
+      priorityClassName: research-low
       containers:
         - name: pytorch
           image: lsx-harbor.informatik.uni-wuerzburg.de/containers/pytorch:latest
           imagePullPolicy: "Always"
           resources:
             limits:
-              nvidia.com/gpu: "1"
-              cpu: "12"
+                    #nvidia.com/gpu: "1"
+              cpu: "8"
               memory: "32Gi"
             requests:
-              nvidia.com/gpu: "1"
+                    #nvidia.com/gpu: "1"
               cpu: "1"
               memory: "4Gi"
           command:
             - "python3"
             - "/home/stud/bernstetter/ma/mainrepo/multimodal/fuse.py"
-            - "--emote_model=/home/stud/bernstetter/models/twitch_multimodal/emote_embeddings/vec_128_w5_mc500_iter10_sg1/saved_model.gensim" 
-            - "--word_model=/home/stud/bernstetter/models/twitch_multimodal/sampled_word_embeddings/{{ month }}/vec_128_w5_mc100_iter10_sg1/saved_model.gensim" 
-            - "--vocab=/home/stud/bernstetter/datasets/twitch_multimodal/sampled/vocabs/{{ month }}_multimodal_vocab.json"
-            - "--out_dir=/home/stud/bernstetter/models/twitch_multimodal/sampled_fused_embeddings/sg1/{{ month }}"
-            - "--epochs=10"
+            - "--emote_model=/home/stud/bernstetter/models/twitch_multimodal/emote_embeddings/vec_128_w5_mc500_iter10_sg0/saved_model.gensim" 
+            - "--word_model=/home/stud/bernstetter/models/twitch_multimodal/synth_word_embeddings/{{ month }}/vec_128_w5_mc100_iter10_sg0/saved_model.gensim" 
+            - "--vocab=/home/stud/bernstetter/datasets/twitch_multimodal/synthetic/global_vocabs/{{ month }}_multimodal_vocab.json"
+            - "--out_dir=/home/stud/bernstetter/models/twitch_multimodal/synth_fused_embeddings/sg0_50ep/global_vocab/{{ month }}"
+            - "--epochs=50"
+            - "--cpu"
           volumeMounts:
             - mountPath: /home/stud/bernstetter
               name: home
