@@ -46,18 +46,22 @@ if __name__ == '__main__':
     args = vars(parser.parse_args())
 
     emote_dirs = args["emote_dirs"]
-    # emote_dirs = "../data/emotes/images"
+    # emote_dirs = "../data/testdata/testimages"
     out_path = args["out"]
     # out_path = "vgg_emote_tensors.pt"
 
-    model = models.vgg19(pretrained=True)
-    model.train()
-    print(model)
+    # model = models.squeezenet1_0()
+    model = models.squeezenet1_1(pretrained=True)
+    # model = models.vgg19(pretrained=True)
+
     model.classifier = nn.Sequential(
-        nn.Linear(in_features=25088, out_features=128)
+        nn.AdaptiveAvgPool2d(output_size=(1, 1))
     )
     print(model)
-    # exit()
+    # model.classifier = nn.Sequential(
+    #     nn.Linear(in_features=25088, out_features=128)
+    # )
+    # print(model)
     # Set final layer to output size 128 in accordance to our embedding sizes
     # model.classifier[6] = nn.Linear(in_features=4096, out_features=128)
 
@@ -77,3 +81,4 @@ if __name__ == '__main__':
 
     # test = torch.load(out_path)
     # print(test["AngelThump"])
+    # print(test["AngelThump"].size())
