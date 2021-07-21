@@ -7,7 +7,7 @@ import argparse
 import json
 
 
-def build_vocabulary2(in_path: str, out_path: str, min_count: int, skip_emotes: int):
+def build_global_vocabulary(in_path: str, out_path: str, min_count: int, skip_emotes: int):
     vocab = {}
     filepath = in_path
     with open(filepath, "r", encoding="utf-8") as csvfile:
@@ -33,7 +33,7 @@ def build_vocabulary2(in_path: str, out_path: str, min_count: int, skip_emotes: 
         json.dump(OrderedDict(c), outfile, indent=2)
 
 
-def build_vocabulary(in_path: str, out_path: str, min_count: int, skip_emotes: int):
+def build_local_vocabulary(in_path: str, out_path: str, min_count: int, skip_emotes: int):
     counter = Counter()
 
     # for file in os.listdir(in_path):
@@ -67,12 +67,17 @@ if __name__ == '__main__':
     parser.add_argument("-o", "--outdir_path")
     parser.add_argument("-m", "--min", type=int, default=100)
     parser.add_argument("-e", "--skip_emotes", type=int, default=0)
+    parser.add_argument("--local_vocab", action="store_true", default=False)
     args = parser.parse_args()
 
     indir = args.infiles_rootdir
     outdir = args.outdir_path
     os.makedirs(os.path.dirname(outdir), exist_ok=True)
-
-    build_vocabulary(indir, outdir, args.min, args.skip_emotes)
-    # build_vocabulary2("../data/testdata/emote_filtered/filtered_201911031555.txt", "vocab.json", min_count=2,
+    
+    if args.local_vocab:
+        build_local_vocabulary(indir, outdir, args.min, args.skip_emotes)
+    else:
+        build_global_vocabulary(indir, outdir, args.min, args.skip_emotes)
+        
+    #build_vocabulary2("../data/testdata/emote_filtered/filtered_201911031555.txt", "vocab.json", min_count=2,
     #                   skip_emotes=1)

@@ -188,10 +188,11 @@ if __name__ == '__main__':
     parser.add_argument("--epochs", type=int, default=10)
     parser.add_argument("--cpu", action="store_true", default=True)
     parser.add_argument("--gpu", action="store_true", default=False)
+    parser.add_argument("--latent_dim", type=int, default=128)
 
     args = vars(parser.parse_args())
     CONFIG = {
-        "latent_dim": 128,
+        "latent_dim": args["latent_dim"],
         "lr": 1e-3,
         "device": "cuda:0" if args["gpu"] else "cpu"  # gpu_id ('x' => multiGPU)
     }
