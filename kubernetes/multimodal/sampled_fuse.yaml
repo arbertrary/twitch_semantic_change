@@ -1,16 +1,15 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: fuse-201905
+  name: fuse-{{ month }}-sg0-sampled
   namespace: studbernstetter
   annotations:
     description: "Fuse vectors of word and emote embeddings"
 spec:
+        #backoffLimit: 0
   template:
     spec:
       priorityClassName: research-low
-      imagePullSecrets:
-        - name: gitlab-registry-bernstetter
       containers:
         - name: pytorch
           image: lsx-harbor.informatik.uni-wuerzburg.de/containers/pytorch:latest
@@ -18,7 +17,7 @@ spec:
           resources:
             limits:
                     #nvidia.com/gpu: "1"
-              cpu: "12"
+              cpu: "8"
               memory: "32Gi"
             requests:
                     #nvidia.com/gpu: "1"
@@ -27,10 +26,12 @@ spec:
           command:
             - "python3"
             - "/home/stud/bernstetter/ma/mainrepo/multimodal/fuse.py"
-            - "--emote_model=/home/stud/bernstetter/models/twitch_multimodal/emote_embeddings/vec_128_w5_mc500_iter10_sg0/saved_model.gensim" 
-            - "--word_model=/home/stud/bernstetter/models/twitch_multimodal/word_embeddings/201906/vec_128_w5_mc100_iter10_sg1/saved_model.gensim" 
-            - "--vocab=/home/stud/bernstetter/datasets/twitch_multimodal/synthetic/vocabs/201906_full_multimodal_vocab.json"
-            - "--out_path=/home/stud/bernstetter/models/twitch_multimodal/fused_embeddings/sg0/201906_fused_vectors.pt"
+            - "--emote_model=/home/stud/bernstetter/models/twitch_multimodal/emote_embeddings/vec_128_w5_mc500_iter10_sg0/saved_model.gensim"
+            - "--word_model=/home/stud/bernstetter/models/twitch_multimodal/sampled_word_embeddings/{{ month }}/vec_128_w5_mc100_iter10_sg0/saved_model.gensim" 
+            - "--vocab=/home/stud/bernstetter/datasets/twitch_multimodal/sampled/global_vocabs/{{ month }}_multimodal_vocab.json"
+            - "--out_dir=/home/stud/bernstetter/models/twitch_multimodal/sampled_fused_embeddings/sg0/global_vocab/{{ month }}"
+            - "--epochs=10"
+            - "--cpu"
           volumeMounts:
             - mountPath: /home/stud/bernstetter
               name: home

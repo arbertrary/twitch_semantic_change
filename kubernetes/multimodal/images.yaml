@@ -8,7 +8,7 @@ metadata:
 spec:
   template:
     spec:
-      priorityClassName: research-med
+      priorityClassName: research-low
       containers:
         - name: pytorch
           image: lsx-harbor.informatik.uni-wuerzburg.de/containers/pytorch:latest
@@ -26,7 +26,7 @@ spec:
             - "python3"
             - "/home/stud/bernstetter/ma/mainrepo/multimodal/image_processing.py"
             - "--emote_dirs=/home/stud/bernstetter/ma/mainrepo/data/emotes/emote_imgs/"
-            - "--out=/home/stud/bernstetter/models/twitch_multimodal/emote_embeddings/emote_img_tensors.pt"
+            - "--out=/home/stud/bernstetter/models/twitch_multimodal/emote_embeddings/vec512_squeeze_emote_img_tensors.pt"
           volumeMounts:
             - mountPath: /home/stud/bernstetter
               name: home

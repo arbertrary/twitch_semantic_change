@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: changepoint-sg0-global-noemotes
+  name: changepoint-sg1-synth-global-noemotes-img
   namespace: studbernstetter
   annotations:
     description: "detect change"
@@ -20,13 +20,13 @@ spec:
               memory: "32Gi"
             requests:
                     #nvidia.com/gpu: "1"
-              cpu: "1"
-              memory: "4Gi"
+              cpu: "4"
+              memory: "10Gi"
           command:
             - "python3"
             - "/home/stud/bernstetter/ma/mainrepo/multimodal/changepoint_lsc.py"
-            - "--models_rootdir=/home/stud/bernstetter/models/twitch_multimodal/synth_fused_embeddings/sg0/global_vocab_noemotes"
-            - "--outfiles_dir=/home/stud/bernstetter/models/twitch_multimodal/synth_results/changepoint/sg0/global_vocab_noemotes/"
+            - "--models_rootdir=/home/stud/bernstetter/models/twitch_multimodal/synth_fused_embeddings_15ep/sg1_images/global_vocab_noemotes"
+            - "--outfiles_dir=/home/stud/bernstetter/models/twitch_multimodal/synth_results/changepoint_15ep/sg1_images/global_vocab_noemotes/"
             - "--align_to=last"
             - "--compare_to=last"
           volumeMounts:

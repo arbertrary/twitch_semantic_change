@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: embedding-{{ month }}-dota-sg1
+  name: embedding-{{ month }}
   namespace: studbernstetter
   annotations:
     description: "creating embeddings"
@@ -25,13 +25,13 @@ spec:
           command:
             - "python3"
             - "/home/stud/bernstetter/ma/mainrepo/embeddings/generate.py"
-            - "--input_dir=/home/stud/bernstetter/datasets/twitch/{{ month }}/games/{{ month }}_30s_Dota2.txt"
-            - "--model_dir=/home/stud/bernstetter/models/twitch/timeseries_games/dota/{{ month }}"
+            - "--input_dir=/home/stud/bernstetter/datasets/twitch_multimodal/full_pathlinesentence/{{ month }}"
+            - "--model_dir=/home/stud/bernstetter/models/twitch_multimodal/full_word_embeddings/{{ month }}"
             - "--worker_count=5"
             - "--skipgram=0"
             - "--word2vec=1"
             - "--epoch_count=10"
-            - "--word_min_count=100"
+            - "--word_min_count=500"
             - "--vector_size=128"
             - "--window_size=5"
             # Default values by room2glo

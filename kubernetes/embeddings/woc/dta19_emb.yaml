@@ -1,10 +1,10 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: filter-full-multimodal-{{ month }}
+  name: embedding-dta-19-sg0
   namespace: studbernstetter
   annotations:
-    description: "create emote corpus files"
+    description: "creating embeddings"
 spec:
   template:
     spec:
@@ -17,17 +17,25 @@ spec:
           imagePullPolicy: "Always"
           resources:
             limits:
-              cpu: "11"
-              memory: "4Gi"
-            requests:
               cpu: "6"
-              memory: "2Gi"
+              memory: "8Gi"
+            requests:
+              cpu: "4"
+              memory: "4Gi"
           command:
             - "python3"
-            - "/home/stud/bernstetter/ma/mainrepo/preprocessing/create_corpusfiles.py"
-            - "--infiles_rootdir=/home/stud/bernstetter/datasets/twitch/{{ month }}/clean/"
-            - "--outdir_path=/home/stud/bernstetter/datasets/twitch_multimodal/full_pathlinesentence/{{ month }}/"
-            - "--mode=f"
+            - "/home/stud/bernstetter/ma/mainrepo/embeddings/generate.py"
+            - "--input_dir=/home/stud/bernstetter/datasets/dta/dta19.txt"
+            - "--model_dir=/home/stud/bernstetter/models/woc_reproduce/dta19/"
+            - "--worker_count=4"
+            - "--skipgram=0"
+            - "--word2vec=1"
+            - "--epoch_count=5"
+            - "--word_min_count=37"
+            - "--vector_size=300"
+            - "--window_size=5"
+            # Default values by room2glo
+            # --vector_size 200 --window_size 10 --min_count 500 --no_of_iter 15
           volumeMounts:
             - mountPath: /home/stud/bernstetter
               name: home

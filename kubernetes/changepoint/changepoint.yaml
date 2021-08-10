@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: baseline-cp-test
+  name: baseline-cp-full
   namespace: studbernstetter
   annotations:
     description: "detect changepoint"
@@ -25,18 +25,18 @@ spec:
           command:
             - "python3"
             - "/home/stud/bernstetter/ma/mainrepo/semantic_change_detection/change_point_detection.py"
-            - "--models_rootdir=/home/stud/bernstetter/models/twitch_multimodal/synth_word_embeddings/"
-            - "--outfiles_dir=/home/stud/bernstetter/models/twitch_multimodal/baseline/changepoint/100samples_test/"
+            - "--models_rootdir=/home/stud/bernstetter/models/twitch_multimodal/full_word_embeddings/"
+            - "--outfiles_dir=/home/stud/bernstetter/models/twitch_multimodal/full_results/word_changepoint/sg0"
               #- "--targets=/home/stud/bernstetter/ma/mainrepo/data/emotes/2021"
             - "--distance_measure=cosine"
-            - "--min_count=100"
+            - "--vector_size=128"
+            - "--min_count=500"
             - "--skipgram=0"
-            - "--n_samples=100"
             - "--no_of_iter=10"
             - "--z_scores"
             - "--align_to=last"
             - "--compare_to=last"
-            - "--vocab_threshold=50"
+            - "--vocab_threshold=75"
           volumeMounts:
             - mountPath: /home/stud/bernstetter
               name: home

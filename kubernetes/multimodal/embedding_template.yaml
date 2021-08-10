@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: embedding-{{ month }}-sg0
+  name: embedding-{{ month }}-sg1
   namespace: studbernstetter
   annotations:
     description: "creating embeddings"
@@ -17,21 +17,21 @@ spec:
           imagePullPolicy: "Always"
           resources:
             limits:
-              cpu: "12"
+              cpu: "5"
               memory: "16Gi"
             requests:
-              cpu: "4"
+              cpu: "1"
               memory: "4Gi"
           command:
             - "python3"
             - "/home/stud/bernstetter/ma/mainrepo/multimodal/embeddings.py"
-            - "--input_dir=/home/stud/bernstetter/datasets/twitch_multimodal/sampled/concat/{{ month }}_concat.tsv"
-            - "--model_dir=/home/stud/bernstetter/models/twitch_multimodal/sampled_word_embeddings/{{ month }}"
-            - "--worker_count=11"
-            - "--skipgram=0"
+            - "--input_dir=/home/stud/bernstetter/datasets/twitch_multimodal/synthetic/subsampled_70/{{ month }}.tsv"
+            - "--model_dir=/home/stud/bernstetter/models/twitch_multimodal/synth_word_embeddings_noemotes/{{ month }}"
+            - "--worker_count=5"
+            - "--skipgram=1"
             - "--epoch_count=10"
             - "--word_min_count=100"
-            - "--vector_size=128"
+            - "--vector_size=512"
             - "--window_size=5"
           volumeMounts:
             - mountPath: /home/stud/bernstetter

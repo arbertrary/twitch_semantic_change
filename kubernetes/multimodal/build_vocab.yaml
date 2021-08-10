@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: build-vocab-{{ month }}-no-em
+  name: build-vocab-{{ month }}
   namespace: studbernstetter
   annotations:
     description: "create global vocab with emotes"
@@ -17,18 +17,19 @@ spec:
           imagePullPolicy: "Always"
           resources:
             limits:
-              cpu: "12"
-              memory: "32Gi"
+              cpu: "2"
+              memory: "16Gi"
             requests:
               cpu: "1"
               memory: "4Gi"
           command:
             - "python3"
             - "/home/stud/bernstetter/ma/mainrepo/multimodal/vocab.py"
-            - "--infiles_rootdir=/home/stud/bernstetter/datasets/twitch_multimodal/synthetic/subsampled_70/{{ month }}.tsv"
-            - "--outdir_path=/home/stud/bernstetter/datasets/twitch_multimodal/synthetic/local_vocabs_noemotes/{{ month }}_multimodal_vocab.json"
-            - "--min=100"
-            - "--skip_emotes=1"
+            - "--infiles_rootdir=/home/stud/bernstetter/datasets/twitch_multimodal/full/{{ month }}"
+            - "--outdir_path=/home/stud/bernstetter/datasets/twitch_multimodal/full/global_vocabs/{{ month }}_multimodal_vocab.json"
+            - "--min=500"
+            - "--em_min=100"
+            - "--skip_emotes=0"
           volumeMounts:
             - mountPath: /home/stud/bernstetter
               name: home
