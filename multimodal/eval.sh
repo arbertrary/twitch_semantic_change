@@ -1,6 +1,6 @@
 #!/bin/bash
 
-BASEDIR=/home/stud/bernstetter/models/twitch_multimodal/synth_results/changepoint
+BASEDIR=/home/stud/bernstetter/models/twitch_multimodal/synth_results/changepoint_15ep
 FILENAME=time_series_analysis_standardized_output_f201905_l202004_alast_clast_s1000_v75
 
 EVALDIR=/home/stud/bernstetter/ma/mainrepo/evaluation/

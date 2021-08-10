@@ -11,17 +11,29 @@ logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=lo
 
 
 class ChatYielder(object):
-    def __init__(self, filepath):
+    def __init__(self, filepath, emotes):
         self.filepath = filepath
+        self.emotes = emotes
 
     def __iter__(self):
-        with open(self.filepath, "r") as file:
-            reader = csv.reader(file, delimiter="\t")
-            for row in reader:
-                yield row[0].split()
+        if os.path.isfile(self.filepath):
+            filepaths = [self.filepath]
+        elif os.path.isdir(self.filepath):
+            filepaths = [os.path.join(self.filepath, f) for f in os.listdir(self.filepath)]
+        else:
+            raise Valueerror
+
+        for filepath in filepaths:
+            with open(filepath, "r") as tsvfile:
+                reader = csv.reader(tsvfile, delimiter="\t")
+                for row in reader:
+                    if self.emotes:
+                        yield row[0].split()
+                    else:
+                        yield [x for x in row[0].split() if not x in row[1].split()]
 
 
-def generate(vector_size, window_size, min_count, no_of_iter, workers, corpus_location, model_save_location, skipgram):
+def generate(vector_size, window_size, min_count, no_of_iter, workers, corpus_location, model_save_location, skipgram, emotes):
     params = {'sg': skipgram, 'size': vector_size, 'window': window_size, 'min_count': min_count, 'iter': no_of_iter,
               'workers': workers, 'sample': 1E-5}
 
@@ -33,7 +45,7 @@ def generate(vector_size, window_size, min_count, no_of_iter, workers, corpus_lo
 
     t = time()
 
-    chat_messages = ChatYielder(corpus_location)
+    chat_messages = ChatYielder(corpus_location, emotes)
     model.build_vocab(sentences=chat_messages, progress_per=50000)
 
     print('Time to build vocab: {} mins'.format(round((time() - t) / 60, 2)))
@@ -76,6 +88,7 @@ if __name__ == '__main__':
     parser.add_argument("-win", "--window_size", type=int, default=5, help="The Window size")
     parser.add_argument("-ep", "--epoch_count", default=10, help="no of iteration")
     parser.add_argument("-sg", "--skipgram", type=int, default=0, help="1 = skipgram, 0 = CBOW")
+    parser.add_argument("--emotes", action="store_true", default=True)
 
     # Settings for this script
 
@@ -88,6 +101,7 @@ if __name__ == '__main__':
     n_ep = int(args["epoch_count"])
     n_workers = int(args["worker_count"])
     sg = int(args["skipgram"])
+    emotes = args["emotes"]
 
     input_dir = args["input_dir"]
 
@@ -95,7 +109,6 @@ if __name__ == '__main__':
 
     print(input_dir)
     print(model_dir)
-    if not os.path.exists(model_dir):
-        os.mkdir(model_dir)
+    os.makedirs(model_dir, exist_ok=True)
 
-    generate(vs, ws, n_mc, n_ep, n_workers, input_dir, model_dir, sg)
+    generate(vs, ws, n_mc, n_ep, n_workers, input_dir, model_dir, sg, emotes)
