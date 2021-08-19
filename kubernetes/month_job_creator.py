@@ -20,4 +20,4 @@ if __name__ == '__main__':
 
         #        job = template.render(month=str(timestep)[:4] + "-" + str(timestep)[4:])
         job = template.render(month=str(timestep))
-        dir.joinpath("job_month_%i.yml" % timestep).write_text(job)
+        dir.joinpath("job_month_%i.yaml" % timestep).write_text(job)

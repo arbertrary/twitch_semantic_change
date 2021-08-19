@@ -1,10 +1,10 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: corpusfile-201911
+  name: unq-emotes
   namespace: studbernstetter
   annotations:
-    description: "create emote corpus files"
+    description: "template for doing anything in my home"
 spec:
   template:
     spec:
@@ -17,17 +17,15 @@ spec:
           imagePullPolicy: "Always"
           resources:
             limits:
-              cpu: "12"
+              cpu: "4"
               memory: "32Gi"
             requests:
               cpu: "1"
-              memory: "4Gi"
+              memory: "12Gi"
           command:
             - "python3"
-            - "/home/stud/bernstetter/ma/mainrepo/preprocessing/create_corpusfiles.py"
-            - "--infiles_rootdir=/home/stud/bernstetter/datasets/twitch/201911/games/dota/"
-            - "--outdir_path=/home/stud/bernstetter/datasets/twitch/201911/games/dota/"
-            - "--mode=u"
+            - "/home/stud/bernstetter/ma/mainrepo/analysis/analyze_data.py"
+            - "--infiles_rootdir=/home/stud/bernstetter/datasets/twitch/emotes"
           volumeMounts:
             - mountPath: /home/stud/bernstetter
               name: home

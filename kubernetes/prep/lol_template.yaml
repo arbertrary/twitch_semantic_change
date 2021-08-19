@@ -1,10 +1,10 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: dota-separate-201911
+  name: corpusfiles-lol
   namespace: studbernstetter
   annotations:
-    description: "template for doing anything in my home"
+    description: "create emote corpus files"
 spec:
   template:
     spec:
@@ -17,17 +17,17 @@ spec:
           imagePullPolicy: "Always"
           resources:
             limits:
+              cpu: "12"
+              memory: "64Gi"
+            requests:
               cpu: "4"
               memory: "16Gi"
-            requests:
-              cpu: "1"
-              memory: "4Gi"
           command:
             - "python3"
-            - "/home/stud/bernstetter/ma/mainrepo/preprocessing/separate_files.py"
-            - "--infiles_dir=/home/stud/bernstetter/datasets/twitch/201911/clean_en_sorted/"
-            - "--outfiles_dir=/home/stud/bernstetter/datasets/twitch/201911/games/"
-            - "--filter_game=Dota 2"
+            - "/home/stud/bernstetter/ma/mainrepo/preprocessing/create_corpusfiles.py"
+            - "--infiles_rootdir=/home/stud/bernstetter/datasets/twitch/games/lol_csv"
+            - "--outdir_path=/home/stud/bernstetter/datasets/twitch/games/30s_lol/"
+            - "--mode=g"
           volumeMounts:
             - mountPath: /home/stud/bernstetter
               name: home

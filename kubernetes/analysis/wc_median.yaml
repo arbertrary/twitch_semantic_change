@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: lol-separate-202002
+  name: wc-{{ month }}
   namespace: studbernstetter
   annotations:
     description: "template for doing anything in my home"
@@ -17,17 +17,15 @@ spec:
           imagePullPolicy: "Always"
           resources:
             limits:
-              cpu: "2"
-              memory: "16Gi"
+              cpu: "4"
+              memory: "8Gi"
             requests:
               cpu: "1"
-              memory: "2Gi"
+              memory: "4Gi"
           command:
             - "python3"
-            - "/home/stud/bernstetter/ma/mainrepo/preprocessing/separate_files.py"
-            - "--infiles_dir=/home/stud/bernstetter/datasets/twitch/202002/clean_en_sorted/"
-            - "--outfiles_dir=/home/stud/bernstetter/datasets/twitch/202002/games/"
-            - "--filter_game=League of Legends"
+            - "/home/stud/bernstetter/ma/mainrepo/analysis/analyze_data.py"
+            - "--infiles_rootdir=/home/stud/bernstetter/datasets/twitch/{{ month }}/ungrouped_txt/"
           volumeMounts:
             - mountPath: /home/stud/bernstetter
               name: home

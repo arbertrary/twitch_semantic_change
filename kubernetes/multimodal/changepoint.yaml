@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: changepoint-sg1-synth-global-noemotes-img
+  name: fused-target-changepoint-sg1
   namespace: studbernstetter
   annotations:
     description: "detect change"
@@ -25,10 +25,11 @@ spec:
           command:
             - "python3"
             - "/home/stud/bernstetter/ma/mainrepo/multimodal/changepoint_lsc.py"
-            - "--models_rootdir=/home/stud/bernstetter/models/twitch_multimodal/synth_fused_embeddings_15ep/sg1_images/global_vocab_noemotes"
-            - "--outfiles_dir=/home/stud/bernstetter/models/twitch_multimodal/synth_results/changepoint_15ep/sg1_images/global_vocab_noemotes/"
+            - "--models_rootdir=/home/stud/bernstetter/models/twitch_multimodal/sampled_fused_embeddings/sg1/global_vocab"
+            - "--outfiles_dir=/home/stud/bernstetter/models/twitch_multimodal/sampled_results/targets_changepoint/sg1/global_vocab/"
             - "--align_to=last"
             - "--compare_to=last"
+            - "--targets=/home/stud/bernstetter/ma/mainrepo/data/targets/twitch_targets.csv"
           volumeMounts:
             - mountPath: /home/stud/bernstetter
               name: home
