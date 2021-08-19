@@ -8,8 +8,9 @@ import json
 from scipy.spatial.distance import cosine
 import numpy as np
 import itertools
+import csv
 
-import twopoint_lsc as tp
+import twostep_lsc as ts
 from torch.multiprocessing import Pool, set_start_method
 
 try:
@@ -19,7 +20,7 @@ except RuntimeError:
 
 
 def get_dist_dict_multithreaded(tup):
-    (i, model_path, compare_to, align_to, vocab,model_paths) = tup
+    (i, model_path, compare_to, align_to, vocab,model_paths,config) = tup
     if i == 0 and compare_to == "first":
         return None
     elif i == len(model_paths) - 1 and compare_to == "last":
@@ -35,22 +36,18 @@ def get_dist_dict_multithreaded(tup):
         else:  # compare to last
             comparison_reference_model_path = model_paths[-1]
 
-        dist_dict = get_dist_dict(model_path, alignment_reference_model_path, comparison_reference_model_path, vocab)
+        dist_dict = get_dist_dict(model_path, alignment_reference_model_path, comparison_reference_model_path, vocab,config)
 
         return (i, dist_dict)
 
 
-def get_dist_dict(model_path, alignment_reference_model_path, comparison_reference_model_path, common_vocab):
+def get_dist_dict(model_path, alignment_reference_model_path, comparison_reference_model_path, common_vocab,config):
     model = torch.load(model_path)
     # alignment_reference_model = torch.load(alignment_reference_model_path)
     comparison_reference_model = torch.load(comparison_reference_model_path)
 
-    # if alignment_reference_model_path != comparison_reference_model_path:
-    #     _, _, comparison_reference_matrix = tp.align_models(alignment_reference_model, comparison_reference_model)
-    #     _, _, model_matrix = tp.align_models(alignment_reference_model, model)
-    # else:
-    intersection_vocab, comparison_reference_matrix, model_matrix = tp.align_models(comparison_reference_model,
-                                                                                    model)
+    intersection_vocab, comparison_reference_matrix, model_matrix = ts.align_models(comparison_reference_model,
+            model, config)
     dist_dict = {}
 
     for word in common_vocab:
@@ -219,14 +216,36 @@ if __name__ == '__main__':
     parser.add_argument("-z", "--z_scores", action="store_true", default=True,
                         help="Include this flag to standardize the distances (i.e. use z-scores). If this flag is not "
                              "included, the raw cosine or neighbourhood scores will be used without standardization.")
+    parser.add_argument("--targets", type=str, help="Path to a csv (or single column) file with target words. If present, only those will be cosidered")
+    parser.add_argument("--latent_dim", type=int, default=128)
+
 
     options = parser.parse_args()
 
+    CONFIG = {"latent_dims": options.latent_dim}
+    
     start_time = datetime.datetime.now()
     print("Starting at {}".format(start_time))
 
-    # align_to = options.align_to
-    # compare_to = options.compare_to
+    targets_temp = []
+    target_path = options.targets
+    if target_path and os.path.isfile(target_path):
+        with open(target_path, "r") as targetsfile:
+            reader = csv.reader(targetsfile, delimiter=",")
+            for row in reader:
+                targets_temp.append(row[0])
+    elif target_path and os.path.isdir(target_path):
+        for file in os.listdir(target_path):
+            with open(os.path.join(target_path, file), "r") as targetsfile:
+                reader = csv.reader(targetsfile, delimiter=",")
+                for row in reader:
+                    targets_temp.append(row[0])
+    else:
+        pass
+
+    targets = set(targets_temp)
+
+
     model_paths = []
     time_slice_labels = []
     timeslices = sorted([ts for ts in os.listdir(options.models_rootdir)])
@@ -283,7 +302,7 @@ if __name__ == '__main__':
         # exit()
 
         pool1 = Pool(12)
-        inputs = [tup + (options.compare_to, options.align_to, vocab,model_paths) for tup in enumerate(model_paths)]
+        inputs = [tup + (options.compare_to, options.align_to, vocab,model_paths, CONFIG) for tup in enumerate(model_paths)]
         dist_dicts = pool1.map(get_dist_dict_multithreaded, inputs)
         # dist_dicts = [get_dist_dict_multithreaded(tup) for tup in enumerate(model_paths)]
 
@@ -357,11 +376,11 @@ if __name__ == '__main__':
         for (i, item) in enumerate(results):
             word = str(item[0])
 
-            # Filter words that are not in the optional target list
-            # if len(targets) != 0 and word not in targets:
-            #     continue
-            #
-            # # If no target list is are specified, break after options.n_best
+             # Filter words that are not in the optional target list
+            if len(targets) != 0 and word not in targets:
+                continue
+            
+            # If no target list is are specified, break after options.n_best
             if i > options.n_best:
                 break
 

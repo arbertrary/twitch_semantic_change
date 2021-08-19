@@ -14,7 +14,7 @@ def align_models(model1, model2, config):
     # generate matrices for both
     # with the words/indices being the same
     alignment_reference_matrix = np.empty((len(intersection_vocab), config["latent_dims"]))
-    other_matrix = np.empty((len(intersection_vocab), ["latent_dims"]))
+    other_matrix = np.empty((len(intersection_vocab), config["latent_dims"]))
 
     for i, word in enumerate(intersection_vocab):
         alignment_reference_matrix[i] = (model1[word].detach().cpu().numpy())
