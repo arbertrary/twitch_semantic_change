@@ -189,13 +189,30 @@ def wc_median(in_dir):
         with open(filename, "r") as f:
             for line in f.readlines():
                 msg_lengths.append(len(line.split()))
-
+    
+    c = Counter()
+    c.update(msg_lengths)
     avg = np.mean(msg_lengths)
     median = np.median(msg_lengths)
     print("Average message length:")
     print(avg)
     print("Median message length:")
-    print(avg)
+    print(median)
+    print(c)
+
+def unique_emotes(in_dir):
+    c = Counter()
+
+    for file in os.listdir(in_dir):
+        print(file)
+        filepath = os.path.join(in_dir, file)
+        with open(filepath, "r") as emotefile:
+            for line in emotefile.readlines():
+                c.update(line.split())
+
+    emotes = [e for e in c if c[e] >= 500]
+    print(len(emotes))
+
 
 
 if __name__ == '__main__':
@@ -210,7 +227,8 @@ if __name__ == '__main__':
     options = parser.parse_args()
     in_path = options.infiles_rootdir
     out_path = options.outfiles_dir
-    wc_median(in_path)
+    #wc_median(in_path)
+    unique_emotes(in_path)
 
     # csvfiles_path = os.path.join(options.infiles_rootdir, options.month, "clean")
     # out_path = os.path.join(options.outfiles_dir, options.month, "analysis")

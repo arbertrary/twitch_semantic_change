@@ -10,6 +10,7 @@ def read_ap_at_50(filepath):
             if row["k_retrieved"] == "50":
                 print("AP @ 50: {:0.3f}".format(float(row["average_precision"])))
                 print("Total # of pseudowords @ 50: {}".format(50 - int(row["n_non_pseudowords"])))
+                #print("Number of C1-C3 pseudowords @ 50: {}".format(int(row["n_correct"])))
 
 
 

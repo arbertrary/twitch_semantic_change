@@ -61,7 +61,7 @@ if __name__ == "__main__":
     # open the results file
     with open(infilepath, 'r') as infile:
         with open(outfilepath, 'w') as outfile:
-            outfile.write("{}\t{}\t{}\t{}\t{}\n".format("k_retrieved", "precision", "recall", "average_precision","n_non_pseudowords"))
+            outfile.write("{}\t{}\t{}\t{}\t{}\t{}\n".format("k_retrieved", "precision", "recall", "average_precision","n_non_pseudowords","n_correct"))
 
             for line in infile:
                 k_retrieved += 1
@@ -89,8 +89,8 @@ if __name__ == "__main__":
                     precision = precision_at_k(k_retrieved, n_correct)
                     recall = recall_at_k(total_n_correct, n_correct)
 
-                    outfile.write("{}\t{}\t{}\t{}\t{}\n".format(k_retrieved, precision, recall, average_precision,
-                                                                n_non_pseudowords))
+                    outfile.write("{}\t{}\t{}\t{}\t{}\t{}\n".format(k_retrieved, precision, recall, average_precision,
+                                                                n_non_pseudowords,n_correct))
 
                     print("\n\n\nk = {}".format(k_retrieved))
                     print("precision: {}".format(precision))
