@@ -2,95 +2,111 @@
 # AVG Prec at 50
 AP @ 50: 0.051
 Total # of pseudowords @ 50: 8
+Number of C1-C3 pseudowords @ 50: 8
 ####
 
 # /sg0/global_vocab_noemotes/
 # AVG Prec at 50
 AP @ 50: 0.047
 Total # of pseudowords @ 50: 10
+Number of C1-C3 pseudowords @ 50: 10
 ####
 
 # /sg0_images/global_vocab/
 # AVG Prec at 50
 AP @ 50: 0.004
 Total # of pseudowords @ 50: 2
+Number of C1-C3 pseudowords @ 50: 1
 ####
 
 # /sg0_images/global_vocab_noemotes/
 # AVG Prec at 50
 AP @ 50: 0.003
 Total # of pseudowords @ 50: 3
+Number of C1-C3 pseudowords @ 50: 2
 ####
 
 # /sg0_images/local_vocab/
 # AVG Prec at 50
 AP @ 50: 0.000
 Total # of pseudowords @ 50: 0
+Number of C1-C3 pseudowords @ 50: 0
 ####
 
 # /sg0_images/local_vocab_noemotes/
 # AVG Prec at 50
 AP @ 50: 0.000
 Total # of pseudowords @ 50: 0
+Number of C1-C3 pseudowords @ 50: 0
 ####
 
 # /sg0/local_vocab/
 # AVG Prec at 50
 AP @ 50: 0.032
 Total # of pseudowords @ 50: 5
+Number of C1-C3 pseudowords @ 50: 5
 ####
 
 # /sg0/local_vocab_noemotes/
 # AVG Prec at 50
 AP @ 50: 0.127
 Total # of pseudowords @ 50: 14
+Number of C1-C3 pseudowords @ 50: 14
 ####
 
 # /sg1/global_vocab/
 # AVG Prec at 50
 AP @ 50: 0.006
 Total # of pseudowords @ 50: 10
+Number of C1-C3 pseudowords @ 50: 6
 ####
 
 # /sg1/global_vocab_noemotes/
 # AVG Prec at 50
 AP @ 50: 0.011
 Total # of pseudowords @ 50: 8
+Number of C1-C3 pseudowords @ 50: 5
 ####
 
 # /sg1_images/global_vocab/
 # AVG Prec at 50
 AP @ 50: 0.014
 Total # of pseudowords @ 50: 7
+Number of C1-C3 pseudowords @ 50: 3
 ####
 
 # /sg1_images/global_vocab_noemotes/
 # AVG Prec at 50
 AP @ 50: 0.005
 Total # of pseudowords @ 50: 5
+Number of C1-C3 pseudowords @ 50: 4
 ####
 
 # /sg1_images/local_vocab/
 # AVG Prec at 50
 AP @ 50: 0.000
 Total # of pseudowords @ 50: 1
+Number of C1-C3 pseudowords @ 50: 1
 ####
 
 # /sg1_images/local_vocab_noemotes/
 # AVG Prec at 50
 AP @ 50: 0.000
 Total # of pseudowords @ 50: 0
+Number of C1-C3 pseudowords @ 50: 0
 ####
 
 # /sg1/local_vocab/
 # AVG Prec at 50
 AP @ 50: 0.022
 Total # of pseudowords @ 50: 4
+Number of C1-C3 pseudowords @ 50: 4
 ####
 
 # /sg1/local_vocab_noemotes/
 # AVG Prec at 50
 AP @ 50: 0.012
 Total # of pseudowords @ 50: 5
+Number of C1-C3 pseudowords @ 50: 5
 ####
 
