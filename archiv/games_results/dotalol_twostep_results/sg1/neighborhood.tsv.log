@@ -1,0 +1,16 @@
+Script started at: 2021-05-28 11:48:51.834093
+
+Output created at: 2021-05-28 11:54:55.964780
+
+Script used: /home/stud/bernstetter/ma/mainrepo/semantic_change_detection/hamilton_semantic_change_measures.py
+
+Options used:-
+model1_filepath	/home/stud/bernstetter/models/twitch_sampled/games/dota/vec_128_w5_mc100_iter10_sg1_lc0_clean0_w2v1/saved_model.gensim
+model2_filepath	/home/stud/bernstetter/models/twitch_sampled/games/lol/vec_128_w5_mc100_iter10_sg1_lc0_clean0_w2v1/saved_model.gensim
+frequency_threshold	0.1
+k_neighbors	25
+t_best	50
+cosine	True
+neighborhood	True
+outfiles_dir	/home/stud/bernstetter/models/twitch_sampled/games_results/dotalol_k25/sg1/
+targets	None

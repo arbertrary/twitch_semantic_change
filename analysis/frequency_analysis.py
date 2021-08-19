@@ -6,10 +6,7 @@ import pandas as pd
 import math
 from nltk.corpus import stopwords
 import matplotlib.pyplot as plt
-import matplotlib
 from itertools import cycle
-import argparse
-
 
 # matplotlib.use('TkAgg')
 
@@ -87,7 +84,6 @@ def get_wordfreqs(in_dir, out_dir):
                 if not month.get(word):
                     write = False
                     break
-                    # wordfreqs.append(0.0)
                 else:
                     wordfreqs.append(month[word])
                     write = True
@@ -102,20 +98,16 @@ def analyze_frequencies(frequency_file):
     for index, row in df.iterrows():
         if str(row[0]).lower() in stopwords.words("english"):
             todrop.append(index)
-        # print(index)
         temp = list(row[1:])
-        # maxdiff = abs(math.log(max(temp)) - math.log(min(temp)))
         maxdiff = abs(max(temp) - min(temp))
 
         diffs.append(maxdiff)
-        # print(temp)
 
     df["MaxDiff"] = diffs
     df = df.drop(todrop)
     df = df.sort_values("MaxDiff", ascending=False)
 
     df.to_csv("../data/freq_analysis/wc100_maxdiffs_log.csv", index=False)
-    # print(df.head(20))
 
 
 def plot_frequencies(diffs_file, words):
@@ -139,33 +131,29 @@ def plot_frequencies(diffs_file, words):
     fig.set_size_inches(10, 5)
     ax.set_xlabel('Months')  # Add an x-label to the axes.
     ax.set_ylabel('log frequency')  # Add a y-label to the axes.
-    ax.set_title("Log Frequency of selected \"meme\" words")  # Add a title to the axes.
+    ax.set_title("Log Frequency of selected words related to Covid-19")  # Add a title to the axes.
     ax.legend()  # Add a legend.
 
-    plt.savefig("/home/armin/masterarbeit/thesis/ausarbeitung/pics/figures/meme_freqs.png")
+    plt.show()
+
+
+def plot_googletrends(csvfile):
+    df = pd.read_csv(csvfile, index_col=0, parse_dates=True)
+    df.plot(figsize=(10, 5.4), style=["-", "--", "-.", ":"])
+    plt.title("Google Trends of words related to Covid-19")
+    plt.xlabel("Months")
+    plt.ylabel("Interest over time")
+
     plt.show()
 
 
 if __name__ == '__main__':
-    # parser = argparse.ArgumentParser()
-    # parser.add_argument("--input_dir", type=str)
-    # parser.add_argument("--output_dir", type=str)
-    # parser.add_argument("--month", type=str)
-    # options = parser.parse_args()
-    #
-    # #get_wordcounts(options.input_dir, options.output_dir, options.month)
-    # get_wordfreqs(options.input_dir, options.output_dir)
-
-    # freqs = "../testdata2/wc100_logfrequencies.csv"
     freqs = "../data/freq_analysis/wc100_logfrequencies.csv"
     diffs = "../data/freq_analysis/wc100_maxdiffs_log.csv"
-    # analyze_frequencies(freqs)
 
-    words = ["simp", "boomer", "mald", "KEKW"]
+    # words = ["simp", "boomer", "mald", "KEKW"]
     # words = ["hongkong", "blizzard", "revolution", "china", "hong", "kong", "censorship"]
     # words = ["PogChamp", "Pog", "Poggers", "EleGiggle", "TriHard"]
-    # words = ["rona", "lockdown", "corona", "quarantine", "virus", "stimulus"]
-    # The emote YEP was submitted to FrankerFaceZ[2] for the first time on December 15th, 2019.
-    # words = ["KEY", "YEP", "hoursBrotherhood", "!drop", "PauseChamp"]
+    words = ["corona", "virus", "lockdown", "quarantine"]
 
     plot_frequencies(diffs, words)

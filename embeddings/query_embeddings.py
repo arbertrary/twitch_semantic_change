@@ -30,10 +30,7 @@ def most_similar(model):
 def retrieve_model(model_path):
     m = os.path.join(model_path)
 
-    if "w2v1" in m:
-        model = gensim.models.Word2Vec.load(m)
-    else:
-        model = gensim.models.FastText.load(m)
+    model = gensim.models.Word2Vec.load(m)
     model = model.wv
     model.init_sims(replace=True)
 

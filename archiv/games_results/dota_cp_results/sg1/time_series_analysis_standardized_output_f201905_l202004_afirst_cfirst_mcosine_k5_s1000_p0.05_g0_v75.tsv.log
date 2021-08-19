@@ -1,0 +1,30 @@
+Script started at: 2021-05-19 15:10:16.372791
+
+Output created at: 2021-05-19 15:27:29.493611
+
+Script used: /home/stud/bernstetter/ma/mainrepo/semantic_change_detection/change_point_detection.py
+
+Options used:- {}
+models_rootdir	/home/stud/bernstetter/models/twitch/timeseries_games/dota/
+align_to	first
+compare_to	first
+distance_measure	cosine
+k_neighbors	5
+n_samples	1000
+p_value_threshold	0.05
+gamma_threshold	0
+rank_by	p_value
+n_best	1000
+vocab_threshold	75
+outfiles_dir	/home/stud/bernstetter/models/twitch/timeseries_games/dota_results/sg1
+vector_size	128
+window_size	5
+min_count	100
+no_of_iter	10
+lower_case	0
+clean	0
+training_mode	independent
+z_scores	True
+skipgram	1
+word2vec	1
+targets	None

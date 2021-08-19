@@ -24,7 +24,7 @@ spec:
               memory: "4Gi"
           command:
             - "python3"
-            - "/home/stud/bernstetter/ma/mainrepo/multimodal/image_processing.py"
+            - "/home/stud/bernstetter/ma/mainrepo/multimodal/image_representations.py"
             - "--emote_dirs=/home/stud/bernstetter/ma/mainrepo/data/emotes/emote_imgs/"
             - "--out=/home/stud/bernstetter/models/twitch_multimodal/emote_embeddings/vec512_squeeze_emote_img_tensors.pt"
           volumeMounts:

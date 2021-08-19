@@ -3,6 +3,10 @@ import os
 from collections import defaultdict
 import argparse
 
+"""
+Adapted Room2glo implementation
+https://github.com/alan-turing-institute/room2glo
+"""
 
 def precision_at_k(k_retrieved, n_correct):
     return n_correct / k_retrieved
@@ -22,9 +26,6 @@ def average_precision_at_k(average_precision, k_retrieved, n_correct, total_n_co
 
 
 if __name__ == "__main__":
-    # EXAMPLE CALL
-    # python evaluation/evaluate_synthetic_data_results.py --results_dir /home/stud/bernstetter/ma/initial/semantic_change_detection/synth/vec_128_w5_mc20_iter3_sg0_lc0_clean1_w2v1/ --results_fn cosine.tsv --word_column 1 --pseudoword_design_dict /home/stud/bernstetter/datasets/synthetic_twitch/pseudoword_dict.json
-
     parser = argparse.ArgumentParser()
     parser.add_argument("-r", "--results_dir", type=str,
                         default="/results/change_point_candidates/independent/1/2012-01_2012-01_to_2017-06_2017-06/vec_200_w10_mc500_iter15_sg0/",
