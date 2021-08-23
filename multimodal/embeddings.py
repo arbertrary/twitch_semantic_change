@@ -21,7 +21,7 @@ class ChatYielder(object):
         elif os.path.isdir(self.filepath):
             filepaths = [os.path.join(self.filepath, f) for f in os.listdir(self.filepath)]
         else:
-            raise Valueerror
+            raise ValueError
 
         for filepath in filepaths:
             with open(filepath, "r") as tsvfile:

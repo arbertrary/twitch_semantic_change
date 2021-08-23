@@ -28,18 +28,18 @@ def load_model(model_path):
     """
     if options.glove:
         print("LOADING GLOVE MODEL")
-        n = random.randint(1,2000)
-        tmp_file = get_tmpfile(str(n)+".txt")
+        n = random.randint(1, 2000)
+        tmp_file = get_tmpfile(str(n) + ".txt")
         glove_file = datapath(model_path)
 
         _ = glove2word2vec(glove_file, tmp_file)
         m = gensim.models.KeyedVectors.load_word2vec_format(tmp_file)
     else:
         m = gensim.models.Word2Vec.load(model_path)
-    
+
     m = m.wv
     m.init_sims(replace=True)
-    
+
     return m
 
 
@@ -301,8 +301,8 @@ if __name__ == "__main__":
     parser.add_argument("-ws", "--window_size", type=int, default=5, help="window size")
     parser.add_argument("-mc", "--min_count", type=int, default=20, help="min count")
     parser.add_argument("-ni", "--no_of_iter", type=int, default=1, help="no of iteration")
-    parser.add_argument("-lc", "--lower_case", type=int, default=0)
-    parser.add_argument("-cl", "--clean", type=int, default=1)
+    # parser.add_argument("-lc", "--lower_case", type=int, default=0)
+    # parser.add_argument("-cl", "--clean", type=int, default=1)
     parser.add_argument("-t", "--training_mode", type=str, default='independent',
                         help="training mode: was it independent or continuous? -- if you want to use alignment, "
                              "say independent.")
@@ -381,7 +381,6 @@ if __name__ == "__main__":
 
         vocab_counter = Counter()
         for ts in timeslices:
-            print("I'M HERE")
             if options.glove:
                 model_path = "{}/{}/glove/vectors.txt".format(options.models_rootdir, ts)
                 print(model_path)
